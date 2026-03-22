@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home Meters | عداداتي</title>
+  <title>Home Meters</title>
   <style>
   /* Tajawal-like fallback for offline use */
   body { font-family: Tajawal, Arial, sans-serif; }
@@ -920,6 +920,9 @@
 
       // Special case for appTitle (bilingual)
       document.querySelector('[data-t="appTitle"]').textContent = lang === 'ar' ? '⚡ عداداتي' : '⚡ Home Meters';
+
+      // Update window title
+      document.title = lang === 'ar' ? 'عداداتي' : 'Home Meters';
 
       updateDisplay();
       if (!document.getElementById('analyticsSection').classList.contains('hidden')) {
