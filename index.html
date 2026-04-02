@@ -1407,13 +1407,55 @@
         correctionFactor: correctionFactor
       };
       const json = JSON.stringify(data, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
+      const date = new Date().toISOString().split('T')[0];
+      const filename = `home-meters-backup-${date}.json`;
+
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        saveFileAndroid(json, filename, 'application/json');
+      } else {
+        saveFileWeb(json, filename, 'application/json');
+      }
+    }
+
+    function saveFileAndroid(content, filename, mimeType) {
+      const { Filesystem } = window.Capacitor.Plugins;
+      const successMsg = currentLang === 'ar' ? `✅ تم الحفظ:\n${filename}` :
+                         currentLang === 'nl' ? `✅ Opgeslagen:\n${filename}` :
+                         currentLang === 'fr' ? `✅ Enregistré:\n${filename}` :
+                         `✅ Saved:\n${filename}`;
+      Filesystem.writeFile({
+        path: `Download/${filename}`,
+        data: content,
+        directory: 'EXTERNAL_STORAGE',
+        encoding: mimeType === 'application/json' ? 'utf8' : undefined,
+        recursive: true
+      }).then(() => {
+        alert(successMsg);
+      }).catch(() => {
+        Filesystem.writeFile({
+          path: filename,
+          data: content,
+          directory: 'DOCUMENTS',
+          encoding: mimeType === 'application/json' ? 'utf8' : undefined,
+          recursive: true
+        }).then(() => {
+          alert(successMsg);
+        }).catch(err => {
+          console.error('Export failed:', err);
+          alert('Export failed: ' + err.message);
+        });
+      });
+    }
+
+    function saveFileWeb(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
-      const date = new Date().toISOString().split('T')[0];
       a.href     = url;
-      a.download = `home-meters-backup-${date}.json`;
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
