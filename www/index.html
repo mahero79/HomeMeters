@@ -1420,6 +1420,7 @@
                                currentLang === 'nl' ? 'Meldingen ingeschakeld ✅' :
                                currentLang === 'fr' ? 'Notifications activées ✅' :
                                'Notifications enabled ✅';
+        scheduleMonthlyNotification();
       } else {
         slider.style.background = '#444';
         thumb.style.transform = 'translateX(0)';
@@ -1427,9 +1428,90 @@
                                currentLang === 'nl' ? 'Meldingen uitgeschakeld' :
                                currentLang === 'fr' ? 'Notifications désactivées' :
                                'Notifications disabled';
+        cancelScheduledNotifications();
       }
       statusEl.style.display = 'block';
       setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+    }
+
+    async function scheduleMonthlyNotification() {
+      // Only on Android native
+      if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+
+      const { LocalNotifications } = window.Capacitor.Plugins;
+      if (!LocalNotifications) return;
+
+      try {
+        // Request permission
+        const perm = await LocalNotifications.requestPermissions();
+        if (perm.display !== 'granted') return;
+
+        // Cancel existing
+        await cancelScheduledNotifications();
+
+        // Calculate next 1st of month at 8:00 AM
+        const now = new Date();
+        let nextFirst = new Date(now.getFullYear(), now.getMonth() + 1, 1, 8, 0, 0);
+        if (now.getDate() === 1 && now.getHours() < 8) {
+          nextFirst = new Date(now.getFullYear(), now.getMonth(), 1, 8, 0, 0);
+        }
+
+        // Get previous month name for notification body
+        const prevMonth = new Date(nextFirst.getFullYear(), nextFirst.getMonth() - 1, 1);
+        const monthNames = translations[currentLang]?.notifMonthNames || translations['en'].notifMonthNames;
+        const prevMonthName = monthNames[prevMonth.getMonth()];
+        const title = translations[currentLang]?.notifTitle || 'Home Meters Pro';
+        const body = `${translations[currentLang]?.notifBody || 'Reminder: Enter your meter readings for'} ${prevMonthName}`;
+
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              id: 1001,
+              title: title,
+              body: body,
+              schedule: {
+                at: nextFirst,
+                repeats: false
+              },
+              sound: null,
+              actionTypeId: '',
+              extra: null
+            }
+          ]
+        });
+
+        // Schedule recurring: every month on the 1st at 8:00
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              id: 1002,
+              title: title,
+              body: translations[currentLang]?.notifBody || 'Reminder: Enter your meter readings',
+              schedule: {
+                on: { day: 1, hour: 8, minute: 0 },
+                repeats: true
+              },
+              sound: null,
+              actionTypeId: '',
+              extra: null
+            }
+          ]
+        });
+
+      } catch(e) {
+        console.error('Notification schedule error:', e);
+      }
+    }
+
+    async function cancelScheduledNotifications() {
+      if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+      const { LocalNotifications } = window.Capacitor.Plugins;
+      if (!LocalNotifications) return;
+      try {
+        await LocalNotifications.cancel({ notifications: [{ id: 1001 }, { id: 1002 }] });
+      } catch(e) {
+        console.error('Cancel notification error:', e);
+      }
     }
 
     function checkMonthlyReminder() {
