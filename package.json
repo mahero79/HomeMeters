@@ -1,7 +1,7 @@
 {
-  "name": "home-meters",
-  "version": "1.0.0",
-  "description": "Home Meters - Track electricity, gas and water consumption",
+  "name": "home-meters-pro",
+  "version": "2.0.0",
+  "description": "Home Meters Pro - Track electricity, gas and water consumption",
   "main": "main.js",
   "author": "Home Meters",
   "license": "MIT",
@@ -15,8 +15,8 @@
     "electron-builder": "^24.0.0"
   },
   "build": {
-    "appId": "com.homemeters.app",
-    "productName": "Home Meters",
+    "appId": "com.homemeterspro.app",
+    "productName": "Home Meters Pro",
     "directories": {
       "output": "dist"
     },
@@ -42,7 +42,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Home Meters"
+      "shortcutName": "Home Meters Pro"
     }
   }
 }
