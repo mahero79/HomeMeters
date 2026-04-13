@@ -773,6 +773,27 @@
         <div id="notifStatus" style="margin-top:10px; font-size:0.8rem; opacity:0.7; display:none"></div>
       </div>
 
+      <!-- Biometric / Fingerprint Setting -->
+      <div class="card" id="biometricCard" style="display:none">
+        <div class="card-header">
+          <span data-t="biometricSetting">🔐 Fingerprint Lock</span>
+        </div>
+        <p style="font-size:0.85rem; opacity:0.75; margin-bottom:15px" data-t="biometricDesc">Require fingerprint or face authentication to open the app.</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span data-t="biometricEnable">Enable fingerprint lock</span>
+          <label style="position:relative; display:inline-block; width:50px; height:26px; cursor:pointer;">
+            <input type="checkbox" id="biometricToggle" onchange="saveBiometricSetting(this.checked)"
+              style="opacity:0; width:0; height:0; position:absolute;">
+            <span id="biometricSlider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+              background:#444; border-radius:26px; transition:0.3s;">
+              <span id="biometricThumb" style="position:absolute; height:20px; width:20px; left:3px; bottom:3px;
+                background:#fff; border-radius:50%; transition:0.3s;"></span>
+            </span>
+          </label>
+        </div>
+        <div id="biometricStatus" style="margin-top:10px; font-size:0.8rem; opacity:0.7; display:none"></div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <span data-t="dataBackup">💾 Data Backup</span>
@@ -947,7 +968,15 @@
         q1: "Q1 (Jan–Mar)", q2: "Q2 (Apr–Jun)", q3: "Q3 (Jul–Sep)", q4: "Q4 (Oct–Dec)",
         h1: "H1 (Jan–Jun)", h2: "H2 (Jul–Dec)",
         months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-        noDataPeriod: "No data for selected period"
+        noDataPeriod: "No data for selected period",
+        biometricSetting: "🔐 Fingerprint Lock",
+        biometricDesc: "Require fingerprint or face authentication to open the app.",
+        biometricEnable: "Enable fingerprint lock",
+        biometricEnabled: "Fingerprint lock enabled ✅",
+        biometricDisabled: "Fingerprint lock disabled",
+        biometricNotAvailable: "Biometric authentication not available on this device.",
+        biometricAuthFailed: "Authentication failed. Please try again.",
+        biometricAuthReason: "Verify your identity to open Home Meters"
       },
       nl: {
         coverTitle: "⚡ Home Meters",
@@ -1038,7 +1067,15 @@
         q1: "K1 (Jan–Mrt)", q2: "K2 (Apr–Jun)", q3: "K3 (Jul–Sep)", q4: "K4 (Okt–Dec)",
         h1: "H1 (Jan–Jun)", h2: "H2 (Jul–Dec)",
         months: ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'],
-        noDataPeriod: "Geen gegevens voor geselecteerde periode"
+        noDataPeriod: "Geen gegevens voor geselecteerde periode",
+        biometricSetting: "🔐 Vingerafdrukslot",
+        biometricDesc: "Vereist vingerafdruk- of gezichtsauthenticatie om de app te openen.",
+        biometricEnable: "Vingerafdrukslot inschakelen",
+        biometricEnabled: "Vingerafdrukslot ingeschakeld ✅",
+        biometricDisabled: "Vingerafdrukslot uitgeschakeld",
+        biometricNotAvailable: "Biometrische authenticatie niet beschikbaar op dit apparaat.",
+        biometricAuthFailed: "Authenticatie mislukt. Probeer het opnieuw.",
+        biometricAuthReason: "Verifieer uw identiteit om Home Meters te openen"
       },
       fr: {
         coverTitle: "⚡ Compteurs",
@@ -1129,7 +1166,15 @@
         q1: "T1 (Jan–Mar)", q2: "T2 (Avr–Jun)", q3: "T3 (Jul–Sep)", q4: "T4 (Oct–Déc)",
         h1: "S1 (Jan–Jun)", h2: "S2 (Jul–Déc)",
         months: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-        noDataPeriod: "Aucune donnée pour la période sélectionnée"
+        noDataPeriod: "Aucune donnée pour la période sélectionnée",
+        biometricSetting: "🔐 Verrou par empreinte",
+        biometricDesc: "Exige une empreinte digitale ou une reconnaissance faciale pour ouvrir l'app.",
+        biometricEnable: "Activer le verrou biométrique",
+        biometricEnabled: "Verrou biométrique activé ✅",
+        biometricDisabled: "Verrou biométrique désactivé",
+        biometricNotAvailable: "Authentification biométrique non disponible sur cet appareil.",
+        biometricAuthFailed: "Échec de l'authentification. Veuillez réessayer.",
+        biometricAuthReason: "Vérifiez votre identité pour ouvrir Home Meters"
       },
       ar: {
         coverTitle: "⚡ عداداتي",
@@ -1220,7 +1265,15 @@
         q1: "ر1 (يناير–مارس)", q2: "ر2 (أبريل–يونيو)", q3: "ر3 (يوليو–سبتمبر)", q4: "ر4 (أكتوبر–ديسمبر)",
         h1: "ن1 (يناير–يونيو)", h2: "ن2 (يوليو–ديسمبر)",
         months: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
-        noDataPeriod: "لا توجد بيانات للفترة المحددة"
+        noDataPeriod: "لا توجد بيانات للفترة المحددة",
+        biometricSetting: "🔐 قفل البصمة",
+        biometricDesc: "يتطلب بصمة الإصبع أو التعرف على الوجه عند فتح التطبيق.",
+        biometricEnable: "تفعيل قفل البصمة",
+        biometricEnabled: "قفل البصمة مفعّل ✅",
+        biometricDisabled: "قفل البصمة معطّل",
+        biometricNotAvailable: "المصادقة البيومترية غير متاحة على هذا الجهاز.",
+        biometricAuthFailed: "فشلت المصادقة. يرجى المحاولة مجدداً.",
+        biometricAuthReason: "تحقق من هويتك لفتح عداداتي"
       }
     };
 
@@ -1304,9 +1357,16 @@
       });
     }
 
-    function startApp() {
+    async function startApp() {
       localStorage.setItem('lang', currentLang);
       localStorage.setItem('appStarted', 'true');
+
+      // إذا البصمة مفعّلة، اطلبها قبل فتح التطبيق
+      if (localStorage.getItem('biometricEnabled') === 'true') {
+        const ok = await performBiometricAuth();
+        if (!ok) return; // لا تفتح التطبيق إذا فشلت المصادقة
+      }
+
       document.getElementById('coverPage').classList.add('hidden');
       document.getElementById('mainApp').style.display = 'block';
       initHouses();
@@ -1372,7 +1432,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       setCoverLang(currentLang);
 
       const coverMode = localStorage.getItem('coverPageMode') || 'once';
@@ -1382,6 +1442,10 @@
         document.getElementById('mainApp').style.display = 'none';
       } else {
         if (localStorage.getItem('appStarted') === 'true') {
+          // Check biometric before showing the app
+          const bioOk = await checkBiometricOnStartup();
+          if (!bioOk) return; // Stay on cover page if biometric failed
+
           document.getElementById('coverPage').classList.add('hidden');
           document.getElementById('mainApp').style.display = 'block';
           initHouses();
@@ -1563,6 +1627,123 @@
       const coverMode = localStorage.getItem('coverPageMode') || 'once';
       const coverSelect = document.getElementById('coverPageMode');
       if (coverSelect) coverSelect.value = coverMode;
+      // Init biometric toggle
+      initBiometricToggle();
+    }
+
+    // ── Biometric / Fingerprint Authentication ──
+
+    function isBiometricAvailable() {
+      return !!(window.Capacitor && window.Capacitor.isNativePlatform() &&
+                window.Capacitor.Plugins && window.Capacitor.Plugins.NativeBiometric);
+    }
+
+    function initBiometricToggle() {
+      const card = document.getElementById('biometricCard');
+      if (!card) return;
+      if (isBiometricAvailable()) {
+        card.style.display = 'block';
+        const enabled = localStorage.getItem('biometricEnabled') === 'true';
+        const toggle = document.getElementById('biometricToggle');
+        const slider = document.getElementById('biometricSlider');
+        const thumb  = document.getElementById('biometricThumb');
+        if (toggle) {
+          toggle.checked = enabled;
+          slider.style.background = enabled ? '#7209b7' : '#444';
+          thumb.style.transform   = enabled ? 'translateX(24px)' : 'translateX(0)';
+        }
+      } else {
+        card.style.display = 'none';
+      }
+    }
+
+    async function saveBiometricSetting(enabled) {
+      const t = translations[currentLang];
+      const slider  = document.getElementById('biometricSlider');
+      const thumb   = document.getElementById('biometricThumb');
+      const toggle  = document.getElementById('biometricToggle');
+      const statusEl = document.getElementById('biometricStatus');
+
+      if (!isBiometricAvailable()) {
+        alert(t.biometricNotAvailable || 'Biometric authentication not available on this device.');
+        if (toggle) toggle.checked = false;
+        return;
+      }
+
+      if (enabled) {
+        // تحقق من توفر البصمة على الجهاز أولاً
+        const { NativeBiometric } = window.Capacitor.Plugins;
+        try {
+          const result = await NativeBiometric.isAvailable();
+          if (!result.isAvailable) {
+            alert(t.biometricNotAvailable || 'Biometric authentication not available on this device.');
+            if (toggle) toggle.checked = false;
+            return;
+          }
+        } catch(e) {
+          alert(t.biometricNotAvailable || 'Biometric authentication not available on this device.');
+          if (toggle) toggle.checked = false;
+          return;
+        }
+
+        // اطلب المصادقة قبل التفعيل
+        const success = await performBiometricAuth();
+        if (!success) {
+          if (toggle) toggle.checked = false;
+          slider.style.background = '#444';
+          thumb.style.transform   = 'translateX(0)';
+          if (statusEl) {
+            statusEl.textContent = t.biometricAuthFailed || 'Authentication failed. Please try again.';
+            statusEl.style.color = '#f87171';
+            statusEl.style.display = 'block';
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+          }
+          return;
+        }
+      }
+
+      localStorage.setItem('biometricEnabled', enabled ? 'true' : 'false');
+      slider.style.background = enabled ? '#7209b7' : '#444';
+      thumb.style.transform   = enabled ? 'translateX(24px)' : 'translateX(0)';
+
+      if (statusEl) {
+        statusEl.textContent = enabled
+          ? (t.biometricEnabled  || 'Fingerprint lock enabled ✅')
+          : (t.biometricDisabled || 'Fingerprint lock disabled');
+        statusEl.style.color = enabled ? '#4ade80' : '#aaaaaa';
+        statusEl.style.display = 'block';
+        setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+      }
+    }
+
+    async function performBiometricAuth() {
+      if (!isBiometricAvailable()) return true;
+      const t = translations[currentLang];
+      const { NativeBiometric } = window.Capacitor.Plugins;
+      try {
+        await NativeBiometric.verifyIdentity({
+          reason: t.biometricAuthReason || 'Verify your identity to open Home Meters',
+          title:  t.biometricSetting   || 'Fingerprint Lock',
+          subtitle: 'Home Meters Pro',
+          useFallback: true,
+          maxAttempts: 3,
+        });
+        return true;
+      } catch(e) {
+        console.warn('Biometric auth failed:', e);
+        return false;
+      }
+    }
+
+    async function checkBiometricOnStartup() {
+      if (!isBiometricAvailable()) return true;
+      if (localStorage.getItem('biometricEnabled') !== 'true') return true;
+      const success = await performBiometricAuth();
+      if (!success) {
+        document.getElementById('coverPage').classList.remove('hidden');
+        document.getElementById('mainApp').style.display = 'none';
+      }
+      return success;
     }
 
     function showSection(section, el) {
@@ -1575,7 +1756,7 @@
       if (el) el.classList.add('active');
 
       if (section === 'analytics') setTimeout(updateAnalytics, 100);
-      if (section === 'settings') { setTimeout(initNotifToggle, 50); setTimeout(renderSettingsHouseList, 50); }
+      if (section === 'settings') { setTimeout(initNotifToggle, 50); setTimeout(renderSettingsHouseList, 50); setTimeout(initBiometricToggle, 50); }
     }
 
     function toggleDateRange() {} // kept for compatibility
@@ -2419,7 +2600,10 @@
     function generatePDF() {
       const period = getPdfPeriod();
       if (!period) {
-        alert(currentLang === 'ar' ? 'يرجى إدخال السنة أولاً' : 'Please enter a year first');
+        alert(currentLang === 'ar' ? 'يرجى إدخال السنة أولاً' :
+            currentLang === 'nl' ? 'Voer eerst een jaar in' :
+            currentLang === 'fr' ? 'Veuillez entrer une année' :
+            'Please enter a year first');
         return;
       }
 
@@ -2437,7 +2621,10 @@
       if (document.getElementById('pdfWater').checked) selectedMeters.push({ key: 'water', meter: 'water', period: null, label: t.water || 'Water', unit: 'm³', icon: '💧' });
 
       if (selectedMeters.length === 0) {
-        alert(currentLang === 'ar' ? 'يرجى اختيار عداد واحد على الأقل' : 'Please select at least one meter');
+        alert(currentLang === 'ar' ? 'يرجى اختيار عداد واحد على الأقل' :
+            currentLang === 'nl' ? 'Selecteer minimaal één meter' :
+            currentLang === 'fr' ? 'Sélectionnez au moins un compteur' :
+            'Please select at least one meter');
         return;
       }
 
