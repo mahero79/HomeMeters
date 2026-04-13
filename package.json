@@ -22,17 +22,24 @@
     },
     "files": [
       "main.js",
-      "index.html"
+      "index.html",
+      "pdfmake.min.js",
+      "vfs_fonts.js",
+      "Almarai-Regular.ttf"
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "icon.ico"
@@ -44,5 +51,12 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Home Meters Pro"
     }
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/local-notifications": "^8.0.0"
   }
 }
