@@ -1,7 +1,7 @@
 {
-  "name": "home-meters",
-  "version": "1.0.0",
-  "description": "Home Meters - Track electricity, gas and water consumption",
+  "name": "home-meters-pro",
+  "version": "2.0.0",
+  "description": "Home Meters Pro - Track electricity, gas and water consumption",
   "main": "main.js",
   "author": "Home Meters",
   "license": "MIT",
@@ -15,24 +15,31 @@
     "electron-builder": "^24.0.0"
   },
   "build": {
-    "appId": "com.homemeters.app",
-    "productName": "Home Meters",
+    "appId": "com.homemeterspro.app",
+    "productName": "Home Meters Pro",
     "directories": {
       "output": "dist"
     },
     "files": [
       "main.js",
-      "index.html"
+      "index.html",
+      "pdfmake.min.js",
+      "vfs_fonts.js",
+      "Almarai-Regular.ttf"
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "icon.ico"
@@ -42,7 +49,14 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Home Meters"
+      "shortcutName": "Home Meters Pro"
     }
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/local-notifications": "^8.0.0"
   }
 }
