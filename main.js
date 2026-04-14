@@ -14,7 +14,9 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      partition: 'persist:homemeterspro'
+      partition: 'persist:homemeterspro',
+      webSecurity: false,
+      allowRunningInsecureContent: true
     },
     show: false,
     center: true,
