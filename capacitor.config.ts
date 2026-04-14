@@ -1,12 +1,10 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
-  appId: 'com.homemeters.app',
-  appName: 'Home Meters',
+  appId: 'com.homemeterspro.app',
+  appName: 'Home Meters Pro',
   webDir: 'www',
   android: {
-    allowMixedContent: true,
-    captureInput: true,
-    webContentsDebuggingEnabled: false
+    allowMixedContent: true
   },
   server: {
     androidScheme: 'http',
