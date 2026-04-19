@@ -2028,8 +2028,10 @@
         correctionFactor: correctionFactor
       };
       const json = JSON.stringify(data, null, 2);
-      const date = new Date().toISOString().split('T')[0];
-      const filename = `home-meters-backup-${date}.json`;
+      const now = new Date();
+      const date = now.toISOString().split('T')[0];
+      const time = now.toTimeString().slice(0,8).replace(/:/g, '-');
+      const filename = `home-meters-backup-${date}_${time}.json`;
 
       // Android: use Capacitor Filesystem
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
@@ -2601,7 +2603,10 @@
         pageMargins: [15,15,15,15]
       };
 
-      const filename = `HomeMeters_${periodLabel.replace(/\s+/g, '_')}.pdf`;
+      const pdfNow = new Date();
+      const pdfDate = pdfNow.toISOString().split('T')[0];
+      const pdfTime = pdfNow.toTimeString().slice(0,8).replace(/:/g, '-');
+      const filename = `HomeMeters_${periodLabel.replace(/\s+/g, '_')}_${pdfDate}_${pdfTime}.pdf`;
 
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         try {
