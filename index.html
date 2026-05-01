@@ -374,7 +374,12 @@
     </div>
 
     <div id="metersGrid">
-      <div class="card">
+      <div id="noHousesCard" style="display:none; grid-column:1/-1; text-align:center; padding:40px 20px;">
+        <div style="font-size:3rem; margin-bottom:12px;">🏠</div>
+        <p style="opacity:0.7; margin-bottom:20px;" data-t="noHouses">No houses added yet</p>
+        <button class="btn btn-primary" onclick="openHouseModal()" style="padding:12px 28px; font-size:1rem;">➕ <span data-t="addHouse">Add House</span></button>
+      </div>
+      <div class="card" id="elecDayCard">
         <div class="card-header">
           <span>⚡ <span data-t="electricityDay">Electricity - Day</span></span>
           <span style="font-size:1.5rem">☀️</span>
@@ -388,7 +393,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="elecNightCard">
         <div class="card-header">
           <span>⚡ <span data-t="electricityNight">Electricity - Night</span></span>
           <span style="font-size:1.5rem">🌙</span>
@@ -402,7 +407,21 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="elecSingleCard" style="display:none;">
+        <div class="card-header">
+          <span>⚡ <span data-t="electricity">Electricity</span></span>
+          <span style="font-size:1.5rem">⚡</span>
+        </div>
+        <div class="card-value" id="elecSingleValue">--</div>
+        <div class="card-date" id="elecSingleDate">-</div>
+        <div class="card-change" id="elecSingleChange">+0 <span data-t="kwh">kWh</span></div>
+        <div class="btn-group">
+          <button class="btn btn-electric" onclick="openModal('electricity', 'single')" data-t="addReading">➕ Add</button>
+          <button class="btn btn-secondary" onclick="openHistory('electricity', 'single')" data-t="history">📋 History</button>
+        </div>
+      </div>
+
+      <div class="card" id="gasCard">
         <div class="card-header">
           <span>🔥 <span data-t="gas">Gas</span></span>
           <span style="font-size:1.5rem">💨</span>
@@ -416,7 +435,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="waterCard">
         <div class="card-header">
           <span>💧 <span data-t="water">Water</span></span>
           <span style="font-size:1.5rem">💧</span>
@@ -443,6 +462,7 @@
           <select id="meterFilter" onchange="updateAnalytics()" style="width:100%">
             <option value="electricity_day" data-t="electricityDay">Electricity - Day</option>
             <option value="electricity_night" data-t="electricityNight">Electricity - Night</option>
+            <option value="electricity_single" data-t="electricity" style="display:none;">Electricity</option>
             <option value="gas" data-t="gas">Gas</option>
             <option value="water" data-t="water">Water</option>
           </select>
@@ -665,19 +685,23 @@
       <div class="card">
         <div class="card-header" style="margin-bottom:15px"><span data-t="selectMeters">Select Meters</span></div>
         <div style="display:flex; flex-direction:column; gap:12px;">
-          <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+          <label id="pdfElecDayLabel" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
             <input type="checkbox" id="pdfElecDay" style="width:18px; height:18px; accent-color:#f72585;">
             <span>⚡ <span data-t="electricityDay">Electricity - Day</span></span>
           </label>
-          <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+          <label id="pdfElecNightLabel" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
             <input type="checkbox" id="pdfElecNight" style="width:18px; height:18px; accent-color:#b5179e;">
             <span>🌙 <span data-t="electricityNight">Electricity - Night</span></span>
           </label>
-          <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+          <label id="pdfElecSingleLabel" style="display:none; align-items:center; gap:12px; cursor:pointer;">
+            <input type="checkbox" id="pdfElecSingle" style="width:18px; height:18px; accent-color:#f72585;">
+            <span>⚡ <span data-t="electricity">Electricity</span></span>
+          </label>
+          <label id="pdfGasLabel" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
             <input type="checkbox" id="pdfGas" style="width:18px; height:18px; accent-color:#ff6b35;">
             <span>🔥 <span data-t="gas">Gas</span></span>
           </label>
-          <label style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+          <label id="pdfWaterLabel" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
             <input type="checkbox" id="pdfWater" style="width:18px; height:18px; accent-color:#00b4d8;">
             <span>💧 <span data-t="water">Water</span></span>
           </label>
@@ -815,6 +839,27 @@
         <label data-t="housePostal">Postal Code</label>
         <input type="text" id="housePostal" placeholder="2000">
       </div>
+      <div class="input-group">
+        <label data-t="selectMeters">Select Meters</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:rgba(255,255,255,0.05); border-radius:10px; padding:12px;">
+            <input type="checkbox" id="meterElecDual" style="width:18px; height:18px; accent-color:#a78bfa; cursor:pointer;">
+            <span data-t="elecTypeDual">⚡ Electricity Dual (Day / Night)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:rgba(255,255,255,0.05); border-radius:10px; padding:12px;">
+            <input type="checkbox" id="meterElecSingle" style="width:18px; height:18px; accent-color:#a78bfa; cursor:pointer;">
+            <span data-t="elecTypeSingle">⚡ Electricity Single</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:rgba(255,255,255,0.05); border-radius:10px; padding:12px;">
+            <input type="checkbox" id="meterGas" style="width:18px; height:18px; accent-color:#f97316; cursor:pointer;">
+            <span data-t="gasmeter">🔥 Gas meter</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:rgba(255,255,255,0.05); border-radius:10px; padding:12px;">
+            <input type="checkbox" id="meterWater" style="width:18px; height:18px; accent-color:#06b6d4; cursor:pointer;">
+            <span data-t="watermeter">💧 Water meter</span>
+          </label>
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="btn btn-cancel" onclick="closeHouseModal()" data-t="cancel">Cancel</button>
         <button class="btn btn-primary" onclick="saveHouse()" data-t="save">Save</button>
@@ -855,6 +900,26 @@
   </div>
 
   <script>
+    // ── Safe localStorage shim (Firefox file:// fix) ──
+    (function() {
+      try { localStorage.getItem('_test'); }
+      catch(e) {
+        const _mem = {};
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem:    k => Object.prototype.hasOwnProperty.call(_mem, k) ? _mem[k] : null,
+            setItem:    (k, v) => { _mem[k] = String(v); },
+            removeItem: k => { delete _mem[k]; },
+            clear:      () => { Object.keys(_mem).forEach(k => delete _mem[k]); },
+            key:        i => Object.keys(_mem)[i] || null,
+            get length(){ return Object.keys(_mem).length; }
+          },
+          writable: false, configurable: true
+        });
+        console.warn('localStorage not available on file://, using in-memory fallback.');
+      }
+    })();
+
     const translations = {
       en: {
         // Cover Page
@@ -885,6 +950,8 @@
         settings: "Settings",
         back: "↩ Back",
         clearData: "🗑️ Clear All Data",
+        clearConfirmAll: "Clear ALL houses data?\n\nOK = All houses\nCancel = Current house only",
+        clearConfirmCurrent: "Clear data for current house only?",
         language: "Language",
         confirmDelete: "Delete this reading?",
         dataBackup: "💾 Data Backup",
@@ -894,6 +961,13 @@
         importError: "❌ Invalid file. Please use a previously exported file.",
         exportPdf: "Export PDF Report",
         addHouse: "Add House", housesManage: "🏠 Houses",
+        electricityMeterType: "Electricity Meter Type",
+        elecTypeDual: "⚡ Dual meter (Day / Night)",
+        elecTypeSingle: "⚡ Single meter",
+        electricity: "Electricity",
+        gasmeter: "🔥 Gas meter",
+        watermeter: "💧 Water meter",
+        selectMeters: "Select Meters",
         houseName: "Name (optional)", houseNamePlaceholder: "e.g. Main House",
         houseNumber: "House Number", houseStreet: "Street",
         houseCity: "City", housePostal: "Postal Code",
@@ -976,6 +1050,8 @@
         settings: "Instellingen",
         back: "↩ Terug",
         clearData: "🗑️ Alle gegevens wissen",
+        clearConfirmAll: "Alle gegevens van ALLE huizen wissen?\n\nOK = Alle huizen\nAnnuleren = Alleen huidig huis",
+        clearConfirmCurrent: "Alleen gegevens van het huidige huis wissen?",
         language: "Taal",
         confirmDelete: "Deze meting verwijderen?",
         dataBackup: "💾 Gegevensback-up",
@@ -985,6 +1061,13 @@
         importError: "❌ Ongeldig bestand. Gebruik een eerder geëxporteerd bestand.",
         exportPdf: "PDF-rapport exporteren",
         addHouse: "Huis toevoegen", housesManage: "🏠 Huizen",
+        electricityMeterType: "Type elektriciteitsmeter",
+        elecTypeDual: "⚡ Dubbele meter (Dag / Nacht)",
+        elecTypeSingle: "⚡ Enkelvoudige meter",
+        electricity: "Elektriciteit",
+        gasmeter: "🔥 Gasmeter",
+        watermeter: "💧 Watermeter",
+        selectMeters: "Meters selecteren",
         houseName: "Naam (optioneel)", houseNamePlaceholder: "bv. Hoofdwoning",
         houseNumber: "Huisnummer", houseStreet: "Straat",
         houseCity: "Stad", housePostal: "Postcode",
@@ -1067,6 +1150,8 @@
         settings: "Paramètres",
         back: "↩ Retour",
         clearData: "🗑️ Effacer toutes les données",
+        clearConfirmAll: "Effacer les données de TOUTES les maisons?\n\nOK = Toutes\nAnnuler = Maison actuelle uniquement",
+        clearConfirmCurrent: "Effacer uniquement les données de la maison actuelle?",
         language: "Langue",
         confirmDelete: "Supprimer ce relevé?",
         dataBackup: "💾 Sauvegarde des données",
@@ -1076,6 +1161,13 @@
         importError: "❌ Fichier invalide. Veuillez utiliser un fichier exporté précédemment.",
         exportPdf: "Exporter rapport PDF",
         addHouse: "Ajouter maison", housesManage: "🏠 Maisons",
+        electricityMeterType: "Type de compteur électrique",
+        elecTypeDual: "⚡ Compteur double (Jour / Nuit)",
+        elecTypeSingle: "⚡ Compteur simple",
+        electricity: "Électricité",
+        gasmeter: "🔥 Compteur gaz",
+        watermeter: "💧 Compteur eau",
+        selectMeters: "Sélectionner les compteurs",
         houseName: "Nom (optionnel)", houseNamePlaceholder: "ex. Maison principale",
         houseNumber: "Numéro", houseStreet: "Rue",
         houseCity: "Ville", housePostal: "Code postal",
@@ -1158,6 +1250,8 @@
         settings: "الإعدادات",
         back: "↩ رجوع",
         clearData: "🗑️ مسح جميع البيانات",
+        clearConfirmAll: "مسح بيانات جميع المنازل؟\n\nموافق = جميع المنازل\nإلغاء = المنزل الحالي فقط",
+        clearConfirmCurrent: "مسح بيانات المنزل الحالي فقط؟",
         language: "اللغة",
         confirmDelete: "حذف هذه القراءة؟",
         dataBackup: "💾 نسخ احتياطي",
@@ -1167,6 +1261,13 @@
         importError: "❌ ملف غير صالح. يرجى استخدام ملف تم تصديره مسبقاً.",
         exportPdf: "تصدير تقرير PDF",
         addHouse: "إضافة منزل", housesManage: "🏠 المنازل",
+        electricityMeterType: "نوع عداد الكهرباء",
+        elecTypeDual: "⚡ عداد مزدوج (نهاري / ليلي)",
+        elecTypeSingle: "⚡ عداد واحد",
+        electricity: "كهرباء",
+        gasmeter: "🔥 عداد الغاز",
+        watermeter: "💧 عداد الماء",
+        selectMeters: "اختيار العدادات",
         houseName: "الاسم (اختياري)", houseNamePlaceholder: "مثال: المنزل الرئيسي",
         houseNumber: "رقم المنزل", houseStreet: "الشارع",
         houseCity: "المدينة", housePostal: "الرمز البريدي",
@@ -1224,45 +1325,37 @@
       }
     };
 
-    let currentLang = localStorage.getItem('lang') || 'en';
+    let currentLang, houses, activeHouseId;
+    try {
+      currentLang  = localStorage.getItem('lang') || 'en';
+      houses       = JSON.parse(localStorage.getItem('houses') || '[]');
+      activeHouseId= localStorage.getItem('activeHouseId') || null;
+    } catch(e) {
+      currentLang  = 'en';
+      houses       = [];
+      activeHouseId= null;
+      console.warn('localStorage init error:', e);
+    }
     let currentMeter = null;
     let currentPeriod = null;
     let editMode = false;
 
-    // ── Houses ──
-    let houses = JSON.parse(localStorage.getItem('houses') || '[]');
-    let activeHouseId = localStorage.getItem('activeHouseId') || null;
-
     // Initialize: if no houses, create a default one
     function initHouses() {
-      // ── Data Migration: move old readings to default house ──
-      const oldReadings = localStorage.getItem('meterReadings');
-      if (oldReadings && houses.length === 0) {
-        // Old data exists, create default house and migrate
-        const defaultHouse = { id: 'house_default', name: '', number: '', street: '', city: '', postal: '' };
-        houses.push(defaultHouse);
-        activeHouseId = 'house_default';
-        localStorage.setItem(`meterReadings_house_default`, oldReadings);
-        localStorage.removeItem('meterReadings');
-        localStorage.setItem('houses', JSON.stringify(houses));
-        localStorage.setItem('activeHouseId', activeHouseId);
-        return;
-      }
+      // Clean up stale default house (no name, no address)
+      houses = houses.filter(h => !(h.id === 'house_default' && !h.name && !h.street && !h.city));
+      localStorage.setItem('houses', JSON.stringify(houses));
 
-      if (houses.length === 0) {
-        const defaultHouse = { id: 'house_default', name: '', number: '', street: '', city: '', postal: '' };
-        houses.push(defaultHouse);
-        activeHouseId = 'house_default';
-        localStorage.setItem('houses', JSON.stringify(houses));
-        localStorage.setItem('activeHouseId', activeHouseId);
-      }
-      if (!activeHouseId || !houses.find(h => h.id === activeHouseId)) {
+      if (houses.length > 0 && (!activeHouseId || !houses.find(h => h.id === activeHouseId))) {
         activeHouseId = houses[0].id;
         localStorage.setItem('activeHouseId', activeHouseId);
+      } else if (houses.length === 0) {
+        activeHouseId = null;
+        localStorage.setItem('activeHouseId', '');
       }
     }
 
-    function getHouseDisplayName(house) {
+        function getHouseDisplayName(house) {
       if (house.name) return house.name;
       const parts = [];
       if (house.street) parts.push(house.street);
@@ -1280,14 +1373,18 @@
     let readings = [];
 
     function loadReadings() {
-      readings = JSON.parse(localStorage.getItem(getReadingsKey()) || '[]');
+      try { readings = JSON.parse(localStorage.getItem(getReadingsKey()) || '[]'); }
+      catch(e) { readings = []; console.warn('loadReadings error:', e); }
     }
 
     function saveReadings() {
-      localStorage.setItem(getReadingsKey(), JSON.stringify(readings));
+      try { localStorage.setItem(getReadingsKey(), JSON.stringify(readings)); }
+      catch(e) { console.warn('saveReadings error:', e); }
     }
 
-    let correctionFactor = parseFloat(localStorage.getItem('correctionFactor')) || 10.35;
+    let correctionFactor = 10.35;
+    try { correctionFactor = parseFloat(localStorage.getItem('correctionFactor')) || 10.35; }
+    catch(e) {}
     let consumptionChart = null;
 
     // ✅ Cover Page Functions - using data-t system
@@ -1617,12 +1714,18 @@
       editMode = readingId !== null;
 
       const titles = {
-        electricity: { day: '☀️ ' + translations[currentLang].electricityDay, night: '🌙 ' + translations[currentLang].electricityNight },
-        gas: '🔥 ' + translations[currentLang].gas,
-        water: '💧 ' + translations[currentLang].water
+        electricity: {
+          day:    '☀️ ' + (translations[currentLang].electricityDay   || 'Electricity - Day'),
+          night:  '🌙 ' + (translations[currentLang].electricityNight || 'Electricity - Night'),
+          single: '⚡ ' + (translations[currentLang].electricity       || 'Electricity')
+        },
+        gas:   '🔥 ' + (translations[currentLang].gas   || 'Gas'),
+        water: '💧 ' + (translations[currentLang].water || 'Water')
       };
 
-      let titleKey = currentPeriod ? titles[meter][period] : titles[meter];
+      let titleKey = (period && titles[meter]?.[period])
+        ? titles[meter][period]
+        : (typeof titles[meter] === 'string' ? titles[meter] : (titles[meter]?.single || ''));
       document.querySelector('[data-t="modalTitle"]').textContent = titleKey;
       document.getElementById('editReadingId').value = readingId || '';
 
@@ -1655,12 +1758,18 @@
       currentPeriod = period;
 
       const titles = {
-        electricity: { day: '☀️ ' + translations[currentLang].electricityDay, night: '🌙 ' + translations[currentLang].electricityNight },
-        gas: '🔥 ' + translations[currentLang].gas,
-        water: '💧 ' + translations[currentLang].water
+        electricity: {
+          day:    '☀️ ' + (translations[currentLang].electricityDay   || 'Electricity - Day'),
+          night:  '🌙 ' + (translations[currentLang].electricityNight || 'Electricity - Night'),
+          single: '⚡ ' + (translations[currentLang].electricity       || 'Electricity')
+        },
+        gas:   '🔥 ' + (translations[currentLang].gas   || 'Gas'),
+        water: '💧 ' + (translations[currentLang].water || 'Water')
       };
 
-      let titleKey = currentPeriod ? titles[meter][period] : titles[meter];
+      let titleKey = (period && titles[meter]?.[period])
+        ? titles[meter][period]
+        : (typeof titles[meter] === 'string' ? titles[meter] : (titles[meter]?.single || ''));
       document.querySelector('[data-t="historyTitle"]').textContent = '📋 ' + titleKey;
 
       const filtered = readings.filter(r =>
@@ -1743,10 +1852,66 @@
       }
     }
 
+    function updateMeterCards() {
+      // Hide all if no houses
+      const noHousesCard = document.getElementById('noHousesCard');
+      if (houses.length === 0) {
+        if (noHousesCard) noHousesCard.style.display = '';
+        ['elecDayCard','elecNightCard','elecSingleCard','gasCard','waterCard'].forEach(id => {
+          const el = document.getElementById(id); if(el) el.style.display = 'none';
+        });
+        return;
+      }
+      if (noHousesCard) noHousesCard.style.display = 'none';
+      const house = houses.find(h => h.id === activeHouseId) || {};
+      const type = house.electricityType || 'dual';
+      const isDual = type === 'dual';
+      const hasGas   = house.hasGas   !== false;
+      const hasWater = house.hasWater !== false;
+      const hasElec = house.hasElec !== false;
+      document.getElementById('elecDayCard').style.display    = (hasElec && isDual)   ? '' : 'none';
+      document.getElementById('elecNightCard').style.display  = (hasElec && isDual)   ? '' : 'none';
+      document.getElementById('elecSingleCard').style.display = (hasElec && !isDual)  ? '' : 'none';
+      const gasCard   = document.getElementById('gasCard');   if(gasCard)   gasCard.style.display   = hasGas   ? '' : 'none';
+      const waterCard = document.getElementById('waterCard'); if(waterCard) waterCard.style.display = hasWater ? '' : 'none';
+      const pdfGasLabel   = document.getElementById('pdfGasLabel');   if(pdfGasLabel)   pdfGasLabel.style.display   = hasGas   ? '' : 'none';
+      const pdfWaterLabel = document.getElementById('pdfWaterLabel'); if(pdfWaterLabel) pdfWaterLabel.style.display = hasWater ? '' : 'none';
+
+      // Update analytics filter options
+      const meterFilter = document.getElementById('meterFilter');
+      if (meterFilter) {
+        const dayOpt    = meterFilter.querySelector('option[value="electricity_day"]');
+        const nightOpt  = meterFilter.querySelector('option[value="electricity_night"]');
+        const singleOpt = meterFilter.querySelector('option[value="electricity_single"]');
+        const gasOpt    = meterFilter.querySelector('option[value="gas"]');
+        const waterOpt  = meterFilter.querySelector('option[value="water"]');
+        if (dayOpt)    dayOpt.style.display    = (hasElec && isDual)  ? '' : 'none';
+        if (nightOpt)  nightOpt.style.display  = (hasElec && isDual)  ? '' : 'none';
+        if (singleOpt) singleOpt.style.display = (hasElec && !isDual) ? '' : 'none';
+        if (gasOpt)    gasOpt.style.display    = hasGas   ? '' : 'none';
+        if (waterOpt)  waterOpt.style.display  = hasWater ? '' : 'none';
+        if (meterFilter.value === 'electricity_day'    && !isDual)   meterFilter.value = 'electricity_single';
+        if (meterFilter.value === 'electricity_night'  && !isDual)   meterFilter.value = 'electricity_single';
+        if (meterFilter.value === 'electricity_single' && isDual)    meterFilter.value = 'electricity_day';
+        if (meterFilter.value === 'gas'   && !hasGas)   meterFilter.value = isDual ? 'electricity_day' : 'electricity_single';
+        if (meterFilter.value === 'water' && !hasWater) meterFilter.value = isDual ? 'electricity_day' : 'electricity_single';
+      }
+
+      // Update PDF checkboxes
+      const pdfElecDay   = document.getElementById('pdfElecDay');
+      const pdfElecNight = document.getElementById('pdfElecNight');
+      const pdfElecSingle = document.getElementById('pdfElecSingle');
+      if (pdfElecDay)    pdfElecDay.closest('label') && (pdfElecDay.closest('label').style.display = (hasElec && isDual)  ? '' : 'none');
+      if (pdfElecNight)  pdfElecNight.closest('label') && (pdfElecNight.closest('label').style.display = (hasElec && isDual)  ? '' : 'none');
+      if (pdfElecSingle) pdfElecSingle.closest('label') && (pdfElecSingle.closest('label').style.display = (hasElec && !isDual) ? '' : 'none');
+    }
+
     function updateDisplay() {
+      updateMeterCards();
       const meters = [
-        { id: 'elecDay', meter: 'electricity', period: 'day', unit: 'kWh' },
-        { id: 'elecNight', meter: 'electricity', period: 'night', unit: 'kWh' },
+        { id: 'elecDay',    meter: 'electricity', period: 'day',    unit: 'kWh' },
+        { id: 'elecNight',  meter: 'electricity', period: 'night',  unit: 'kWh' },
+        { id: 'elecSingle', meter: 'electricity', period: 'single', unit: 'kWh' },
         { id: 'gas', meter: 'gas', period: null, unit: 'm³' },
         { id: 'water', meter: 'water', period: null, unit: 'm³' }
       ];
@@ -1842,7 +2007,7 @@
     function buildMonthlyConsumption(allReadingsForMeter, startDate, endDate, isGas) {
       const sorted = [...allReadingsForMeter].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      // قائمة الأشهر ضمن الفترة
+      // Build month list within the period
       const months = [];
       let cur = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
       const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
@@ -1860,16 +2025,7 @@
       const names = shortNames[currentLang] || shortNames['en'];
       const labels = months.map(m => `${names[m.month]}\u00A0${m.year}`);
 
-      // المنطق الصحيح:
-      // استهلاك شهر M = قراءة أول (M+1) - قراءة أول M
-      // لكن القراءات قد لا تكون موجودة في كل شهر
-      // لذا نبني جدول: لكل شهر في الفترة، ما هي القيمة التراكمية المقدّرة؟
-      // نأخذ القراءتين المتتاليتين الفعليتين ونوزع الاستهلاك بالتساوي بين أشهرهما
-
-      // أولاً: نبني قائمة بالقراءات الفعلية المرتبة
-      // لكل زوج من القراءات المتتاليتين، نوزع الاستهلاك على الأشهر بينهما
-
-      // نبني map: "YYYY-M" -> قيمة الاستهلاك لهذا الشهر
+      // Build consumption map: accumulate diffs between consecutive readings
       const consumptionMap = {};
 
       for (let i = 0; i < sorted.length - 1; i++) {
@@ -1877,30 +2033,33 @@
         const r2 = sorted[i + 1];
         const d1 = new Date(r1.date);
         const d2 = new Date(r2.date);
+        const diff = parseFloat(r2.value) - parseFloat(r1.value);
+        if (diff <= 0) continue;
 
         const gap = (d2.getFullYear() - d1.getFullYear()) * 12
                   + (d2.getMonth() - d1.getMonth());
 
-        if (gap <= 0) continue;
-
-        const diff = r2.value - r1.value;
-        if (diff <= 0) continue;
-
-        const perMonth = diff / gap;
-
-        // وزّع على كل شهر بين r1 و r2
-        for (let g = 0; g < gap; g++) {
-          const y = d1.getFullYear() + Math.floor((d1.getMonth() + g) / 12);
-          const mo = (d1.getMonth() + g) % 12;
-          const key = `${y}-${mo}`;
-          consumptionMap[key] = perMonth;
+        if (gap === 0) {
+          // Same month — add full diff to that month
+          const key = `${d1.getFullYear()}-${d1.getMonth()}`;
+          consumptionMap[key] = (consumptionMap[key] || 0) + diff;
+        } else {
+          // Different months — distribute evenly across the gap months
+          const perMonth = diff / gap;
+          for (let g = 0; g < gap; g++) {
+            const totalM = d1.getMonth() + g;
+            const y  = d1.getFullYear() + Math.floor(totalM / 12);
+            const mo = totalM % 12;
+            const key = `${y}-${mo}`;
+            consumptionMap[key] = (consumptionMap[key] || 0) + perMonth;
+          }
         }
       }
 
       const data = months.map(m => {
         const key = `${m.year}-${m.month}`;
         const val = consumptionMap[key] || 0;
-        return isGas ? parseFloat(convertToKwh(val)) : val;
+        return isGas ? parseFloat(convertToKwh(val)) : parseFloat(val.toFixed(2));
       });
 
       return { labels, data };
@@ -2020,9 +2179,20 @@
     }
 
     function exportData() {
+      // Collect readings for ALL houses
+      const allHousesReadings = {};
+      houses.forEach(h => {
+        const key = `meterReadings_${h.id}`;
+        const r = localStorage.getItem(key);
+        allHousesReadings[h.id] = r ? JSON.parse(r) : [];
+      });
+
       const data = {
-        version: 1,
+        version: 2,
         exportDate: new Date().toISOString(),
+        houses: houses,
+        allHousesReadings: allHousesReadings,
+        activeHouseId: activeHouseId,
         readings: readings,
         lang: currentLang,
         correctionFactor: correctionFactor
@@ -2099,6 +2269,42 @@
       URL.revokeObjectURL(url);
     }
 
+    function applyImportedData(data) {
+      const statusEl = document.getElementById('importStatus');
+      if (!data.readings && !data.allHousesReadings) throw new Error('invalid');
+
+      // Restore all houses if present (version 2)
+      if (data.houses && Array.isArray(data.houses)) {
+        houses = data.houses;
+        localStorage.setItem('houses', JSON.stringify(houses));
+      }
+      if (data.allHousesReadings) {
+        Object.keys(data.allHousesReadings).forEach(houseId => {
+          localStorage.setItem(`meterReadings_${houseId}`, JSON.stringify(data.allHousesReadings[houseId]));
+        });
+      } else if (data.readings) {
+        // version 1 backup - restore to active house
+        readings = data.readings;
+        saveReadings();
+      }
+      if (data.activeHouseId) {
+        activeHouseId = data.activeHouseId;
+        localStorage.setItem('activeHouseId', activeHouseId);
+      }
+      if (data.correctionFactor) {
+        correctionFactor = data.correctionFactor;
+        localStorage.setItem('correctionFactor', correctionFactor);
+      }
+      loadReadings();
+      updateHouseBar();
+      updateDisplay();
+      renderSettingsHouseList();
+      statusEl.textContent = translations[currentLang].importSuccess || '✅ Imported!';
+      statusEl.style.color = '#4ade80';
+      statusEl.style.display = 'block';
+      setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+    }
+
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -2107,40 +2313,35 @@
         const statusEl = document.getElementById('importStatus');
         try {
           const data = JSON.parse(e.target.result);
-          if (!data.readings || !Array.isArray(data.readings)) throw new Error('invalid');
-
-          readings = data.readings;
-          saveReadings();
-
-          if (data.correctionFactor) {
-            correctionFactor = data.correctionFactor;
-            localStorage.setItem('correctionFactor', correctionFactor);
-          }
-
-          updateDisplay();
-          statusEl.textContent = translations[currentLang].importSuccess || '✅ Imported!';
-          statusEl.style.color = '#4ade80';
-          statusEl.style.display = 'block';
+          applyImportedData(data);
         } catch(err) {
           statusEl.textContent = translations[currentLang].importError || '❌ Invalid file.';
           statusEl.style.color = '#f87171';
           statusEl.style.display = 'block';
+          setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
         }
-        // reset input so same file can be re-imported
         event.target.value = '';
-        setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
       };
       reader.readAsText(file);
     }
 
     function clearData() {
-      if (confirm(translations[currentLang].clearConfirm || 'Clear all data?')) {
+      const t = translations[currentLang];
+      const choice = confirm(t.clearConfirmAll || 'Clear ALL houses data?\n\nOK = All houses\nCancel = Current house only');
+      if (choice) {
+        // Clear all houses
+        houses.forEach(h => localStorage.removeItem(`meterReadings_${h.id}`));
+        readings = [];
+        saveReadings();
+      } else {
+        // Ask again specifically for current house
+        if (!confirm(t.clearConfirmCurrent || 'Clear data for current house only?')) return;
         readings = [];
         localStorage.removeItem(getReadingsKey());
-        updateDisplay();
-        if (!document.getElementById('analyticsSection').classList.contains('hidden')) {
-          updateAnalytics();
-        }
+      }
+      updateDisplay();
+      if (!document.getElementById('analyticsSection').classList.contains('hidden')) {
+        updateAnalytics();
       }
     }
 
@@ -2153,7 +2354,7 @@
       if (nameEl && house) nameEl.textContent = getHouseDisplayName(house);
       // Hide bar if only one default house with no data
       const bar = document.getElementById('houseSelectorBar');
-      if (bar) bar.style.display = houses.length <= 1 && !houses[0].name && !houses[0].street ? 'none' : 'flex';
+      if (bar) bar.style.display = houses.length === 0 ? 'none' : (houses.length === 1 && !houses[0]?.name && !houses[0]?.street ? 'none' : 'flex');
     }
 
     function toggleHouseDropdown() {
@@ -2222,7 +2423,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <button onclick="openEditHouseModal('${house.id}')" style="background:rgba(59,130,246,0.3); color:#60a5fa; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.85rem;">${t.editHouse || '✏️'}</button>
-            ${houses.length > 1 ? `<button onclick="deleteHouse('${house.id}')" style="background:rgba(239,68,68,0.3); color:#f87171; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.85rem;">${t.deleteHouse || '🗑️'}</button>` : ''}
+            <button onclick="deleteHouse('${house.id}')" style="background:rgba(239,68,68,0.3); color:#f87171; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.85rem;">${t.deleteHouse || '🗑️'}</button>
           </div>
         `;
         list.appendChild(item);
@@ -2256,6 +2457,40 @@
       document.getElementById('houseModal').classList.add('active');
     }
 
+    function openHouseModal(houseId) {
+      const modal = document.getElementById('houseModal');
+      document.getElementById('editHouseId').value = houseId || '';
+      document.getElementById('houseName').value = '';
+      document.getElementById('houseNumber').value = '';
+      document.getElementById('houseStreet').value = '';
+      document.getElementById('houseCity').value = '';
+      document.getElementById('housePostal').value = '';
+      if(document.getElementById('meterElecDual'))   document.getElementById('meterElecDual').checked   = false;
+      if(document.getElementById('meterElecSingle')) document.getElementById('meterElecSingle').checked = false;
+      if(document.getElementById('meterGas'))   document.getElementById('meterGas').checked   = false;
+      if(document.getElementById('meterWater')) document.getElementById('meterWater').checked = false;
+
+      if (houseId) {
+        const h = houses.find(x => x.id === houseId);
+        if (h && typeof h === 'object') {
+          document.getElementById('houseName').value = h.name || '';
+          document.getElementById('houseNumber').value = h.number || '';
+          document.getElementById('houseStreet').value = h.street || '';
+          document.getElementById('houseCity').value = h.city || '';
+          document.getElementById('housePostal').value = h.postal || '';
+          const et = h.electricityType || 'dual';
+          if (document.getElementById('meterElecDual'))   document.getElementById('meterElecDual').checked   = h.hasElec !== false && et === 'dual';
+          if (document.getElementById('meterElecSingle')) document.getElementById('meterElecSingle').checked = h.hasElec !== false && et === 'single';
+          if (document.getElementById('meterGas'))   document.getElementById('meterGas').checked   = h.hasGas   === true;
+          if (document.getElementById('meterWater')) document.getElementById('meterWater').checked = h.hasWater === true;
+        }
+        document.getElementById('houseModalTitle').textContent = translations[currentLang].editHouse || 'Edit House';
+      } else {
+        document.getElementById('houseModalTitle').textContent = translations[currentLang].addHouse || 'Add House';
+      }
+      modal.classList.add('active');
+    }
+
     function closeHouseModal() {
       document.getElementById('houseModal').classList.remove('active');
     }
@@ -2273,11 +2508,17 @@
         return;
       }
 
+      const hasElecDual   = document.getElementById('meterElecDual')?.checked ?? false;
+      const hasElecSingle = document.getElementById('meterElecSingle')?.checked ?? false;
+      const electricityType = hasElecSingle ? 'single' : 'dual';
+      const hasElec  = hasElecDual || hasElecSingle;
+      const hasGas   = document.getElementById('meterGas')?.checked ?? false;
+      const hasWater = document.getElementById('meterWater')?.checked ?? false;
       if (editId) {
         const idx = houses.findIndex(h => h.id === editId);
-        if (idx !== -1) houses[idx] = { ...houses[idx], name, number, street, city, postal };
+        if (idx !== -1) houses[idx] = { ...houses[idx], name, number, street, city, postal, electricityType, hasElec, hasGas, hasWater };
       } else {
-        const newHouse = { id: `house_${Date.now()}`, name, number, street, city, postal };
+        const newHouse = { id: `house_${Date.now()}`, name, number, street, city, postal, electricityType, hasElec, hasGas, hasWater };
         houses.push(newHouse);
         // If this is the first real house replacing default
         if (houses.length === 2 && houses[0].id === 'house_default' && !houses[0].name && !houses[0].street) {
@@ -2350,6 +2591,38 @@
 		  el.textContent = translations[currentLang][key];
 		  }
 		  });
+
+      // ── Init meter checkboxes based on current house type ──
+      const currentHouse = houses.find(h => h.id === activeHouseId);
+      if (currentHouse) {
+        const isDual   = (currentHouse.electricityType || 'dual') === 'dual';
+        const hasElec  = currentHouse.hasElec  !== false;
+        const hasGas   = currentHouse.hasGas   !== false;
+        const hasWater = currentHouse.hasWater  !== false;
+        // Show/hide electricity labels
+        const dayLbl    = document.getElementById('pdfElecDayLabel');
+        const nightLbl  = document.getElementById('pdfElecNightLabel');
+        const singleLbl = document.getElementById('pdfElecSingleLabel');
+        if (dayLbl)    dayLbl.style.display    = (hasElec && isDual)  ? 'flex' : 'none';
+        if (nightLbl)  nightLbl.style.display  = (hasElec && isDual)  ? 'flex' : 'none';
+        if (singleLbl) singleLbl.style.display = (hasElec && !isDual) ? 'flex' : 'none';
+        // Uncheck all meters by default — user selects manually
+        const elecDay    = document.getElementById('pdfElecDay');
+        const elecNight  = document.getElementById('pdfElecNight');
+        const elecSingle = document.getElementById('pdfElecSingle');
+        const gasChk     = document.getElementById('pdfGas');
+        const waterChk   = document.getElementById('pdfWater');
+        if (elecDay)    elecDay.checked    = false;
+        if (elecNight)  elecNight.checked  = false;
+        if (elecSingle) elecSingle.checked = false;
+        if (gasChk)     gasChk.checked     = false;
+        if (waterChk)   waterChk.checked   = false;
+        // Show/hide gas and water labels based on house config
+        const gasLbl   = document.getElementById('pdfGasLabel');
+        const waterLbl = document.getElementById('pdfWaterLabel');
+        if (gasLbl)   gasLbl.style.display   = hasGas   ? 'flex' : 'none';
+        if (waterLbl) waterLbl.style.display  = hasWater ? 'flex' : 'none';
+      }
 		  }
 
 		  function closePdfExport() {
@@ -2446,10 +2719,11 @@
 		  const includeChart   = document.getElementById('pdfIncludeChart').checked;
 
 		  const selectedMeters = [];
-		  if (document.getElementById('pdfElecDay').checked)   selectedMeters.push({ key: 'electricity_day',   meter: 'electricity', period: 'day',   label: t.electricityDay   || 'Electricity - Day',   unit: 'kWh' });
-		  if (document.getElementById('pdfElecNight').checked) selectedMeters.push({ key: 'electricity_night', meter: 'electricity', period: 'night', label: t.electricityNight || 'Electricity - Night', unit: 'kWh' });
-		  if (document.getElementById('pdfGas').checked)       selectedMeters.push({ key: 'gas',   meter: 'gas',   period: null, label: t.gas   || 'Gas',   unit: 'm³' });
-		  if (document.getElementById('pdfWater').checked)     selectedMeters.push({ key: 'water', meter: 'water', period: null, label: t.water || 'Water', unit: 'm³' });
+		  if (document.getElementById('pdfElecDay') && document.getElementById('pdfElecDay').checked)   selectedMeters.push({ key: 'electricity_day',   meter: 'electricity', period: 'day',   label: t.electricityDay   || 'Electricity - Day',   unit: 'kWh' });
+		  if (document.getElementById('pdfElecNight') && document.getElementById('pdfElecNight').checked) selectedMeters.push({ key: 'electricity_night', meter: 'electricity', period: 'night', label: t.electricityNight || 'Electricity - Night', unit: 'kWh' });
+		  if (document.getElementById('pdfElecSingle') && document.getElementById('pdfElecSingle').checked) selectedMeters.push({ key: 'electricity_single', meter: 'electricity', period: 'single', label: t.electricity || 'Electricity', unit: 'kWh' });
+		  if (document.getElementById('pdfGas') && document.getElementById('pdfGas').checked)   selectedMeters.push({ key: 'gas',   meter: 'gas',   period: null, label: t.gas   || 'Gas',   unit: 'm³' });
+		  if (document.getElementById('pdfWater') && document.getElementById('pdfWater').checked) selectedMeters.push({ key: 'water', meter: 'water', period: null, label: t.water || 'Water', unit: 'm³' });
 
 		  if (selectedMeters.length === 0) {
 		  alert(currentLang === 'ar' ? 'يرجى اختيار عداد واحد على الأقل' :
@@ -2484,6 +2758,11 @@
 
 		  const docContent = [];
 
+		  // ── Get current house info ──
+		  const pdfHouse = houses.find(h => h.id === activeHouseId);
+		  const houseName = pdfHouse ? (pdfHouse.name || '') : '';
+		  const houseAddr = pdfHouse ? [pdfHouse.street, pdfHouse.number, pdfHouse.city, pdfHouse.postal].filter(Boolean).join(' ') : '';
+
 		  // ── Header ──
 		  docContent.push({
 		  table: { widths: ['*'], body: [[{
@@ -2498,8 +2777,16 @@
 		  ],
 		  fillColor: '#323250', margin: [10,12,10,12]
 		  }]] },
-		  layout: 'noBorders', margin: [0,0,0,8]
+		  layout: 'noBorders', margin: [0,0,0,4]
 		  });
+
+		  // ── House name + address ──
+		  if (houseName || houseAddr) {
+		  const houseStack = [];
+		  if (houseName) houseStack.push({ text: isRTL ? '\u200F' + houseName : houseName, font, fontSize: 12, bold: true, color: '#323250', alignment: 'center' });
+		  if (houseAddr) houseStack.push({ text: isRTL ? '\u200F' + houseAddr : houseAddr, font, fontSize: 10, color: '#555577', alignment: 'center', margin: [0,2,0,0] });
+		  docContent.push({ stack: houseStack, margin: [0,0,0,8] });
+		  }
 
 		  // ── Date ──
 		  docContent.push({
@@ -2520,6 +2807,9 @@
 		  const monthlyDataRaw = buildMonthlyConsumption(allForMeter, startDate, endDate, false);
 		  const total = monthlyDataRaw.data.reduce((s, v) => s + parseFloat(v || 0), 0);
 		  const avg   = total / numMonths;
+
+		  // ── Skip meter if no readings exist at all ──
+		  if (allForMeter.length === 0) return;
 
 		  // Meter header
 		  docContent.push({
