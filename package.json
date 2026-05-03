@@ -11,7 +11,7 @@
     "build-win32": "electron-builder --win --ia32"
   },
   "devDependencies": {
-    "electron": "^28.0.0",
+    "electron": "^36.0.0",
     "electron-builder": "^24.0.0"
   },
   "build": {
@@ -23,6 +23,7 @@
     "files": [
       "main.js",
       "index.html",
+      "chart.umd.min.js",
       "pdfmake.min.js",
       "vfs_fonts.js",
       "Almarai-Regular.ttf"
@@ -51,12 +52,5 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Home Meters Pro"
     }
-  },
-  "dependencies": {
-    "@capacitor/android": "^8.3.0",
-    "@capacitor/cli": "^8.3.0",
-    "@capacitor/core": "^8.3.0",
-    "@capacitor/filesystem": "^8.1.2",
-    "@capacitor/local-notifications": "^8.0.0"
   }
 }
