@@ -1,37 +1,45 @@
-# Home Meters Pro - Windows App v2.0
+# Home Meters Pro — Android App (v2.0.0)
+
+تطبيق لتتبع استهلاك الكهرباء والغاز والماء. يدعم منازل متعددة وأربع لغات (EN / NL / FR / AR).
 
 ## متطلبات البناء
-- Node.js (v18 أو أحدث): https://nodejs.org
+- Node.js v18 أو أحدث: https://nodejs.org
+- Android Studio: https://developer.android.com/studio
+- Java JDK 17 أو أحدث
 
 ## خطوات بناء التطبيق
 
 ### 1. تثبيت المتطلبات
-افتح PowerShell كـ Administrator داخل مجلد HomeMeters Pro وشغّل:
 ```
-node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" install
-```
-
-### 2. تشغيل التطبيق مباشرة (للتجربة)
-```
-node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" start
+npm install
 ```
 
-### 3. بناء ملف التثبيت (.exe)
+### 2. مزامنة الملفات مع Capacitor
 ```
-node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build-win
+npm run sync
 ```
 
-بعد الانتهاء، ستجد في مجلد `dist`:
-- `Home Meters Pro Setup 2.0.0.exe` ← ملف التثبيت
-- `Home Meters Pro 2.0.0.exe` ← نسخة portable
+### 3. فتح المشروع في Android Studio
+```
+npm run open
+```
+ثم في Android Studio:
+- `Build` → `Generate Signed Bundle / APK`
+- اختر `APK` أو `Android App Bundle (AAB)` لـ Play Store
 
-## ميزات النسخة Pro v2.0
-- ✅ دعم منازل متعددة
-- ✅ تحليلات متقدمة (شهري، ربع سنوي، نصف سنوي، سنوي)
-- ✅ تصدير تقارير PDF
-- ✅ تنبيهات شهرية
-- ✅ تصدير/استيراد البيانات
+## هيكل المشروع
+```
+├── android/             ← مشروع Android Studio
+├── www/                 ← ملفات الويب (تُنسخ تلقائياً)
+├── index.html           ← التطبيق الرئيسي
+├── pdfmake.min.js       ← مكتبة تصدير PDF
+├── vfs_fonts.js         ← خطوط PDF
+├── Almarai-Regular.ttf  ← خط عربي
+├── capacitor.config.ts  ← إعدادات Capacitor
+└── package.json         ← إعدادات المشروع
+```
 
 ## ملاحظات
-- البيانات محفوظة على جهازك بشكل دائم
-- لإضافة أيقونة مخصصة: ضع ملف `icon.ico` (256x256) في نفس المجلد
+- البيانات محفوظة على الجهاز بشكل دائم
+- استخدم زر Export/Import لنقل البيانات أو عمل نسخة احتياطية
+- البصمة تعمل فقط على الأجهزة التي تدعمها

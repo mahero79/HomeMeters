@@ -2,55 +2,12 @@
   "name": "home-meters-pro",
   "version": "2.0.0",
   "description": "Home Meters Pro - Track electricity, gas and water consumption",
-  "main": "main.js",
   "author": "Home Meters",
   "license": "MIT",
   "scripts": {
-    "start": "electron .",
-    "build-win": "electron-builder --win --x64",
-    "build-win32": "electron-builder --win --ia32"
-  },
-  "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.0.0"
-  },
-  "build": {
-    "appId": "com.homemeterspro.app",
-    "productName": "Home Meters Pro",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "main.js",
-      "index.html",
-      "pdfmake.min.js",
-      "vfs_fonts.js",
-      "Almarai-Regular.ttf"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Home Meters Pro"
-    }
+    "sync": "npx cap sync android",
+    "open": "npx cap open android",
+    "build": "npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.0",
@@ -58,6 +15,10 @@
     "@capacitor/core": "^8.3.0",
     "@capacitor/filesystem": "^8.1.2",
     "@capacitor/local-notifications": "^8.0.0",
+    "@capacitor/share": "^8.0.1",
     "capacitor-native-biometric": "^4.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
   }
 }
