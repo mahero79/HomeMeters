@@ -26,7 +26,9 @@
       "chart.umd.min.js",
       "pdfmake.min.js",
       "vfs_fonts.js",
-      "Almarai-Regular.ttf"
+      "Almarai-Regular.ttf",
+      "almarai-font-data.js",
+      "pdf-export.js"
     ],
     "win": {
       "target": [

@@ -12,8 +12,9 @@ function createWindow() {
     title: 'Home Meters Pro',
     backgroundColor: '#1a1a2e',
     webPreferences: {
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
       partition: 'persist:homemeterspro',
       webSecurity: false,
       allowRunningInsecureContent: true
