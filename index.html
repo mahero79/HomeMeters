@@ -852,6 +852,29 @@
       </div>
     </div>
   </div>
+  <!-- Meter Replacement Modal -->
+  <div class="modal" id="meterReplacementModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="meterReplacementTitle">🔄 Change Water Meter</h3>
+      <input type="hidden" id="meterReplacementHouseId">
+      <input type="hidden" id="meterReplacementMeterType">
+      <div class="input-group">
+        <label id="meterReplacementLabel">Last reading of old meter (m³)</label>
+        <input type="number" id="meterReplacementValue" step="0.01" placeholder="0.00" min="0">
+      </div>
+      <div class="input-group" style="margin-top:12px;">
+        <label id="meterReplacementDateLabel">Replacement date</label>
+        <input type="date" id="meterReplacementDate">
+      </div>
+      <p style="font-size:0.8rem; opacity:0.7; margin-top:8px;" id="meterReplacementHint">Enter the value shown on the old meter when it was replaced. Readings after this date will be automatically corrected.</p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeMeterReplacementModal()" id="meterReplacementCancelBtn">Cancel</button>
+        <button class="btn" style="background:rgba(239,68,68,0.3); color:#f87171;" onclick="resetMeterReplacement()" id="meterReplacementResetBtn">Reset</button>
+        <button class="btn btn-water" onclick="saveMeterReplacement()" id="meterReplacementSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="addModal">
     <div class="modal-content">
       <h3 class="modal-title" data-t="modalTitle">Add Reading</h3>
@@ -940,6 +963,7 @@
         houseNumber: "House Number", houseStreet: "Street",
         houseCity: "City", housePostal: "Postal Code",
         editHouse: "Edit", deleteHouse: "Delete",
+        changeMeter: "🔄 Change Meter", changeMeterTitle: "🔄 Change Meter", changeMeterLabel: "Last reading of old meter", changeMeterHint: "Enter the value shown on the old meter when it was replaced. Readings after this date will be automatically corrected.", changeMeterSaved: "Meter replacement saved successfully.", changeMeterDateLabel: "Replacement date", changeMeterReset: "Reset", changeMeterResetConfirm: "Reset meter replacement for this meter? All corrections will be removed.",
         confirmDeleteHouse: "Delete this house and all its data?",
         selectMonth: "Select Month",
         selectQuarter: "Select Quarter",
@@ -1055,6 +1079,7 @@
         houseNumber: "Huisnummer", houseStreet: "Straat",
         houseCity: "Stad", housePostal: "Postcode",
         editHouse: "Bewerken", deleteHouse: "Verwijderen",
+        changeMeter: "🔄 Meter vervangen", changeMeterTitle: "🔄 Meter vervangen", changeMeterLabel: "Laatste stand oude meter", changeMeterHint: "Voer de stand in op de oude meter bij vervanging. Meterstanden na deze datum worden automatisch gecorrigeerd.", changeMeterSaved: "Metervervanging opgeslagen.", changeMeterDateLabel: "Vervangingsdatum", changeMeterReset: "Reset", changeMeterResetConfirm: "Metervervanging resetten? Alle correcties worden verwijderd.",
         confirmDeleteHouse: "Dit huis en alle bijbehorende gegevens verwijderen?",
         selectMonth: "Select Month",
         selectQuarter: "Select Quarter",
@@ -1185,6 +1210,7 @@
         houseNumber: "Numéro", houseStreet: "Rue",
         houseCity: "Ville", housePostal: "Code postal",
         editHouse: "Modifier", deleteHouse: "Supprimer",
+        changeMeter: "🔄 Remplacer compteur", changeMeterTitle: "🔄 Remplacer compteur", changeMeterLabel: "Dernière lecture de l'ancien compteur", changeMeterHint: "Entrez la valeur affichée sur l'ancien compteur lors du remplacement. Les relevés après cette date seront corrigés automatiquement.", changeMeterSaved: "Remplacement du compteur enregistré.", changeMeterDateLabel: "Date de remplacement", changeMeterReset: "Réinitialiser", changeMeterResetConfirm: "Réinitialiser le remplacement du compteur? Toutes les corrections seront supprimées.",
         confirmDeleteHouse: "Supprimer cette maison et toutes ses données?",
         selectMonth: "Select Month",
         selectQuarter: "Select Quarter",
@@ -1315,6 +1341,7 @@
         houseNumber: "رقم المنزل", houseStreet: "الشارع",
         houseCity: "المدينة", housePostal: "الرمز البريدي",
         editHouse: "تعديل", deleteHouse: "حذف",
+        changeMeter: "🔄 تغيير العداد", changeMeterTitle: "🔄 تغيير العداد", changeMeterLabel: "القراءة الأخيرة للعداد القديم", changeMeterHint: "أدخل القراءة التي توقف عندها العداد القديم. القراءات بعد هذا التاريخ سيتم تصحيحها تلقائياً.", changeMeterSaved: "تم حفظ تغيير العداد بنجاح.", changeMeterDateLabel: "تاريخ التغيير", changeMeterReset: "إعادة تعيين", changeMeterResetConfirm: "إعادة تعيين تغيير العداد؟ سيتم إلغاء جميع التصحيحات.",
         confirmDeleteHouse: "حذف هذا المنزل وجميع بياناته؟",
         selectMonth: "Select Month",
         selectQuarter: "Select Quarter",
@@ -1421,6 +1448,16 @@
         if (h.hasWater === undefined) h.hasWater = false;
         if (h.hasElec  === undefined) h.hasElec  = true;
         if (!h.electricityType)       h.electricityType = 'dual';
+        if (h.waterMeterOffset === undefined) h.waterMeterOffset = 0;
+        if (h.waterMeterDate === undefined) h.waterMeterDate = null;
+        if (h.gasOffset === undefined) h.gasOffset = 0;
+        if (h.gasOffsetDate === undefined) h.gasOffsetDate = null;
+        if (h.elecDayOffset === undefined) h.elecDayOffset = 0;
+        if (h.elecDayOffsetDate === undefined) h.elecDayOffsetDate = null;
+        if (h.elecNightOffset === undefined) h.elecNightOffset = 0;
+        if (h.elecNightOffsetDate === undefined) h.elecNightOffsetDate = null;
+        if (h.elecSingleOffset === undefined) h.elecSingleOffset = 0;
+        if (h.elecSingleOffsetDate === undefined) h.elecSingleOffsetDate = null;
         return h;
       });
       localStorage.setItem('houses', JSON.stringify(houses));
@@ -1547,6 +1584,8 @@
       document.title = lang === 'ar' ? 'عداداتي' : 'Home Meters';
 
       updateDisplay();
+      renderSettingsHouseList();
+      updateHouseBar();
       if (!document.getElementById('analyticsSection').classList.contains('hidden')) {
         updateAnalytics();
       }
@@ -1905,17 +1944,37 @@
         return;
       }
 
+      // Helper: calculate stored value with offset
+      function calcStoredValue(rawValue, meter, period, readingDate) {
+        const activeHouse = houses.find(h => h.id === activeHouseId);
+        let offset = 0, offsetDate = null;
+        if (meter === 'water') {
+          offset = activeHouse?.waterMeterOffset || 0;
+          offsetDate = activeHouse?.waterMeterDate || null;
+        } else if (meter === 'gas') {
+          offset = activeHouse?.gasOffset || 0;
+          offsetDate = activeHouse?.gasOffsetDate || null;
+        } else if (meter === 'electricity') {
+          if (period === 'day')    { offset = activeHouse?.elecDayOffset || 0;    offsetDate = activeHouse?.elecDayOffsetDate || null; }
+          else if (period === 'night')  { offset = activeHouse?.elecNightOffset || 0;  offsetDate = activeHouse?.elecNightOffsetDate || null; }
+          else if (period === 'single') { offset = activeHouse?.elecSingleOffset || 0; offsetDate = activeHouse?.elecSingleOffsetDate || null; }
+        }
+        return (offset > 0 && offsetDate && readingDate >= offsetDate) ? rawValue + offset : rawValue;
+      }
+
       if (editMode && editId) {
         const index = readings.findIndex(r => r.id == editId);
         if (index !== -1) {
-          readings[index] = { ...readings[index], value, date, notes };
+          const storedValue = calcStoredValue(value, currentMeter, currentPeriod, date);
+          readings[index] = { ...readings[index], value: storedValue, date, notes };
         }
       } else {
+        const storedValue = calcStoredValue(value, currentMeter, currentPeriod, date);
         readings.push({
           id: Date.now(),
           meter: currentMeter,
           period: currentPeriod,
-          value: value,
+          value: storedValue,
           date: date,
           notes: notes,
         });
@@ -2000,6 +2059,16 @@
         { id: 'water', meter: 'water', period: null, unit: 'm³' }
       ];
 
+      const activeHouseDisp = houses.find(h => h.id === activeHouseId) || {};
+      function getOffset(meter, period) {
+        if (meter === 'water')       return { offset: activeHouseDisp.waterMeterOffset || 0,    date: activeHouseDisp.waterMeterDate || null };
+        if (meter === 'gas')         return { offset: activeHouseDisp.gasOffset || 0,            date: activeHouseDisp.gasOffsetDate || null };
+        if (meter === 'electricity' && period === 'day')    return { offset: activeHouseDisp.elecDayOffset || 0,    date: activeHouseDisp.elecDayOffsetDate || null };
+        if (meter === 'electricity' && period === 'night')  return { offset: activeHouseDisp.elecNightOffset || 0,  date: activeHouseDisp.elecNightOffsetDate || null };
+        if (meter === 'electricity' && period === 'single') return { offset: activeHouseDisp.elecSingleOffset || 0, date: activeHouseDisp.elecSingleOffsetDate || null };
+        return { offset: 0, date: null };
+      }
+
       meters.forEach(({ id, meter, period, unit }) => {
         const filtered = readings.filter(r =>
           r.meter === meter &&
@@ -2014,10 +2083,19 @@
         const changeEl = document.getElementById(`${id}Change`);
 
         if (latest) {
-          valueEl.textContent = `${latest.value.toLocaleString()} ${unit}`;
+          const { offset, date: offDate } = getOffset(meter, period);
+          const displayValue = (offset > 0 && offDate && latest.date >= offDate)
+            ? latest.value - offset
+            : latest.value;
+          valueEl.textContent = `${displayValue.toLocaleString()} ${unit}`;
           dateEl.textContent = formatDate(latest.date);
           if (prev) {
-            const diff = (latest.value - prev.value).toFixed(1);
+            // Use display values for diff to avoid cross-boundary inflation
+            const { offset: offPrev, date: offDatePrev } = getOffset(meter, period);
+            const prevDisplay = (offPrev > 0 && offDatePrev && prev.date >= offDatePrev)
+              ? prev.value - offPrev
+              : prev.value;
+            const diff = (displayValue - prevDisplay).toFixed(1);
             const sign = diff >= 0 ? '+' : '';
             changeEl.textContent = `${sign}${diff} ${unit}`;
             changeEl.style.color = diff >= 0 ? '#4ade80' : '#f87171';
@@ -2506,6 +2584,11 @@
           </div>
           <div style="display:flex; gap:8px;">
             <button onclick="openHouseModal('${house.id}')" style="background:rgba(59,130,246,0.3); color:#60a5fa; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.85rem;">${t.editHouse || '✏️'}</button>
+            ${house.hasElec && (house.electricityType||'dual')==='dual' ? `<button onclick="openMeterReplacementModal('${house.id}','elec_day')" style="background:rgba(167,139,250,0.3); color:#a78bfa; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;">☀️🔄</button>` : ''}
+            ${house.hasElec && (house.electricityType||'dual')==='dual' ? `<button onclick="openMeterReplacementModal('${house.id}','elec_night')" style="background:rgba(167,139,250,0.3); color:#a78bfa; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;">🌙🔄</button>` : ''}
+            ${house.hasElec && (house.electricityType||'dual')!=='dual' ? `<button onclick="openMeterReplacementModal('${house.id}','elec_single')" style="background:rgba(167,139,250,0.3); color:#a78bfa; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;">⚡🔄</button>` : ''}
+            ${house.hasGas ? `<button onclick="openMeterReplacementModal('${house.id}','gas')" style="background:rgba(249,115,22,0.3); color:#f97316; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;">🔥🔄</button>` : ''}
+            ${house.hasWater ? `<button onclick="openMeterReplacementModal('${house.id}','water')" style="background:rgba(6,182,212,0.3); color:#22d3ee; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;">💧🔄</button>` : ''}
             <button onclick="deleteHouse('${house.id}')" style="background:rgba(239,68,68,0.3); color:#f87171; border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.85rem;">${t.deleteHouse || '🗑️'}</button>
           </div>
         `;
@@ -2634,6 +2717,163 @@
       updateHouseBar();
       renderSettingsHouseList();
       updateDisplay();
+    }
+
+
+    function openMeterReplacementModal(houseId, meterType) {
+      const house = houses.find(h => h.id === houseId);
+      if (!house) return;
+      const t = translations[currentLang];
+      const isDual = (house.electricityType || 'dual') === 'dual';
+
+      // Determine offset/date based on meterType
+      let offsetVal = 0, offsetDate = '';
+      if (meterType === 'water')       { offsetVal = house.waterMeterOffset || 0;  offsetDate = house.waterMeterDate || ''; }
+      else if (meterType === 'gas')    { offsetVal = house.gasOffset || 0;          offsetDate = house.gasOffsetDate || ''; }
+      else if (meterType === 'elec_day')    { offsetVal = house.elecDayOffset || 0;    offsetDate = house.elecDayOffsetDate || ''; }
+      else if (meterType === 'elec_night')  { offsetVal = house.elecNightOffset || 0;  offsetDate = house.elecNightOffsetDate || ''; }
+      else if (meterType === 'elec_single') { offsetVal = house.elecSingleOffset || 0; offsetDate = house.elecSingleOffsetDate || ''; }
+
+      // Meter label for title
+      const meterNames = {
+        en: { water: 'Water Meter', gas: 'Gas Meter', elec_day: '☀️ Electricity Day', elec_night: '🌙 Electricity Night', elec_single: '⚡ Electricity' },
+        nl: { water: 'Watermeter',  gas: 'Gasmeter',  elec_day: '☀️ Elektriciteit Dag', elec_night: '🌙 Elektriciteit Nacht', elec_single: '⚡ Elektriciteit' },
+        fr: { water: 'Compteur eau', gas: 'Compteur gaz', elec_day: '☀️ Électricité Jour', elec_night: '🌙 Électricité Nuit', elec_single: '⚡ Électricité' },
+        ar: { water: 'عداد الماء',  gas: 'عداد الغاز', elec_day: '☀️ الكهرباء النهارية', elec_night: '🌙 الكهرباء الليلية', elec_single: '⚡ الكهرباء' }
+      };
+      const meterName = (meterNames[currentLang] || meterNames.en)[meterType] || '';
+
+      document.getElementById('meterReplacementHouseId').value = houseId;
+      document.getElementById('meterReplacementMeterType').value = meterType;
+      document.getElementById('meterReplacementValue').value = offsetVal || '';
+      document.getElementById('meterReplacementDate').value = offsetDate;
+      document.getElementById('meterReplacementTitle').textContent = `🔄 ${meterName}`;
+      document.getElementById('meterReplacementLabel').textContent = t.changeMeterLabel || 'Last reading of old meter';
+      document.getElementById('meterReplacementDateLabel').textContent = t.changeMeterDateLabel || 'Replacement date';
+      document.getElementById('meterReplacementHint').textContent = t.changeMeterHint || '';
+      document.getElementById('meterReplacementCancelBtn').textContent = t.cancel || 'Cancel';
+      document.getElementById('meterReplacementResetBtn').textContent = t.changeMeterReset || 'Reset';
+      document.getElementById('meterReplacementSaveBtn').textContent = t.save || 'Save';
+      document.getElementById('meterReplacementModal').classList.add('active');
+    }
+
+    function closeMeterReplacementModal() {
+      document.getElementById('meterReplacementModal').classList.remove('active');
+    }
+
+    function resetMeterReplacement() {
+      const houseId = document.getElementById('meterReplacementHouseId').value;
+      const meterType = document.getElementById('meterReplacementMeterType').value;
+      const t = translations[currentLang];
+      if (!confirm(t.changeMeterResetConfirm || 'Reset meter replacement?')) return;
+
+      const idx = houses.findIndex(h => h.id === houseId);
+      if (idx !== -1) {
+        const house = houses[idx];
+        const key = `meterReadings_${houseId}`;
+        let houseReadings = [];
+        try { houseReadings = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+
+        // Get current offset to reverse it
+        let offset = 0, offsetDate = null;
+        if (meterType === 'water')       { offset = house.waterMeterOffset || 0; offsetDate = house.waterMeterDate; house.waterMeterOffset = 0; house.waterMeterDate = null; }
+        else if (meterType === 'gas')    { offset = house.gasOffset || 0; offsetDate = house.gasOffsetDate; house.gasOffset = 0; house.gasOffsetDate = null; }
+        else if (meterType === 'elec_day')    { offset = house.elecDayOffset || 0; offsetDate = house.elecDayOffsetDate; house.elecDayOffset = 0; house.elecDayOffsetDate = null; }
+        else if (meterType === 'elec_night')  { offset = house.elecNightOffset || 0; offsetDate = house.elecNightOffsetDate; house.elecNightOffset = 0; house.elecNightOffsetDate = null; }
+        else if (meterType === 'elec_single') { offset = house.elecSingleOffset || 0; offsetDate = house.elecSingleOffsetDate; house.elecSingleOffset = 0; house.elecSingleOffsetDate = null; }
+
+        const meterMap = {
+          water:       [{ meter: 'water',       period: null }],
+          gas:         [{ meter: 'gas',         period: null }],
+          elec_day:    [{ meter: 'electricity', period: 'day' }],
+          elec_night:  [{ meter: 'electricity', period: 'night' }],
+          elec_single: [{ meter: 'electricity', period: 'single' }]
+        };
+        const targets = meterMap[meterType] || [];
+
+        // Reverse the offset on readings that had it applied
+        houseReadings = houseReadings.map(r => {
+          const match = targets.some(tgt =>
+            r.meter === tgt.meter && (tgt.period ? r.period === tgt.period : !r.period || r.period === undefined)
+          );
+          if (match && r.offsetApplied) {
+            r.value = r.value - offset;
+            delete r.offsetApplied;
+          }
+          return r;
+        });
+
+        localStorage.setItem('houses', JSON.stringify(houses));
+        localStorage.setItem(key, JSON.stringify(houseReadings));
+        if (houseId === activeHouseId) loadReadings();
+      }
+      closeMeterReplacementModal();
+      updateDisplay();
+    }
+
+    function saveMeterReplacement() {
+      const houseId = document.getElementById('meterReplacementHouseId').value;
+      const meterType = document.getElementById('meterReplacementMeterType').value;
+      const offset = parseFloat(document.getElementById('meterReplacementValue').value) || 0;
+      const replacementDate = document.getElementById('meterReplacementDate').value;
+      const t = translations[currentLang];
+
+      if (!replacementDate) {
+        alert(currentLang === 'ar' ? 'يرجى إدخال تاريخ التغيير' : 'Please enter the replacement date');
+        return;
+      }
+
+      const idx = houses.findIndex(h => h.id === houseId);
+      if (idx !== -1) {
+        const house = houses[idx];
+        const isDual = (house.electricityType || 'dual') === 'dual';
+
+        if (meterType === 'water') {
+          house.waterMeterOffset = offset; house.waterMeterDate = replacementDate;
+        } else if (meterType === 'gas') {
+          house.gasOffset = offset; house.gasOffsetDate = replacementDate;
+        } else if (meterType === 'elec_day') {
+          house.elecDayOffset = offset; house.elecDayOffsetDate = replacementDate;
+        } else if (meterType === 'elec_night') {
+          house.elecNightOffset = offset; house.elecNightOffsetDate = replacementDate;
+        } else if (meterType === 'elec_single') {
+          house.elecSingleOffset = offset; house.elecSingleOffsetDate = replacementDate;
+        }
+        localStorage.setItem('houses', JSON.stringify(houses));
+
+        // Determine which meter readings to update
+        const meterMap = {
+          water:       [{ meter: 'water',       period: null }],
+          gas:         [{ meter: 'gas',         period: null }],
+          elec_day:    [{ meter: 'electricity', period: 'day' }],
+          elec_night:  [{ meter: 'electricity', period: 'night' }],
+          elec_single: [{ meter: 'electricity', period: 'single' }]
+        };
+        const targets = meterMap[meterType] || [];
+
+        const key = `meterReadings_${houseId}`;
+        let houseReadings = [];
+        try { houseReadings = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+
+        houseReadings = houseReadings.map(r => {
+          const match = targets.some(tgt =>
+            r.meter === tgt.meter && (tgt.period ? r.period === tgt.period : !r.period || r.period === undefined)
+          );
+          // Only add offset if not already added (check using a flag)
+          if (match && r.date >= replacementDate && !r.offsetApplied) {
+            r.value = r.value + offset;
+            r.offsetApplied = true;
+          }
+          return r;
+        });
+
+        localStorage.setItem(key, JSON.stringify(houseReadings));
+        if (houseId === activeHouseId) loadReadings();
+      }
+
+      closeMeterReplacementModal();
+      updateDisplay();
+      alert(t.changeMeterSaved || 'Meter replacement saved successfully.');
     }
 
     document.getElementById('addModal').addEventListener('click', (e) => {
@@ -2994,5 +3234,7 @@
       }
     }
   </script>
+  <script src="almarai-font-data.js"></script>
+  <script src="pdf-export.js"></script>
 </body>
 </html>
