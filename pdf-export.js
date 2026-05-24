@@ -240,6 +240,15 @@ async function generatePDF() {
     return;
   }
 
+  // ── Load Almarai font from almarai-font-data.js ──
+  if (isRTL && !pdfMake.vfs['Almarai-Regular.ttf']) {
+    if (window.almaraiFontData) {
+      pdfMake.vfs['Almarai-Regular.ttf'] = window.almaraiFontData;
+    } else {
+      console.error('Could not load Almarai font: window.almaraiFontData not found');
+    }
+  }
+
   pdfMake.fonts = {
     Almarai: {
       normal: 'Almarai-Regular.ttf',
