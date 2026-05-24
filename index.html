@@ -1944,37 +1944,17 @@
         return;
       }
 
-      // Helper: calculate stored value with offset
-      function calcStoredValue(rawValue, meter, period, readingDate) {
-        const activeHouse = houses.find(h => h.id === activeHouseId);
-        let offset = 0, offsetDate = null;
-        if (meter === 'water') {
-          offset = activeHouse?.waterMeterOffset || 0;
-          offsetDate = activeHouse?.waterMeterDate || null;
-        } else if (meter === 'gas') {
-          offset = activeHouse?.gasOffset || 0;
-          offsetDate = activeHouse?.gasOffsetDate || null;
-        } else if (meter === 'electricity') {
-          if (period === 'day')    { offset = activeHouse?.elecDayOffset || 0;    offsetDate = activeHouse?.elecDayOffsetDate || null; }
-          else if (period === 'night')  { offset = activeHouse?.elecNightOffset || 0;  offsetDate = activeHouse?.elecNightOffsetDate || null; }
-          else if (period === 'single') { offset = activeHouse?.elecSingleOffset || 0; offsetDate = activeHouse?.elecSingleOffsetDate || null; }
-        }
-        return (offset > 0 && offsetDate && readingDate >= offsetDate) ? rawValue + offset : rawValue;
-      }
-
       if (editMode && editId) {
         const index = readings.findIndex(r => r.id == editId);
         if (index !== -1) {
-          const storedValue = calcStoredValue(value, currentMeter, currentPeriod, date);
-          readings[index] = { ...readings[index], value: storedValue, date, notes };
+          readings[index] = { ...readings[index], value, date, notes };
         }
       } else {
-        const storedValue = calcStoredValue(value, currentMeter, currentPeriod, date);
         readings.push({
           id: Date.now(),
           meter: currentMeter,
           period: currentPeriod,
-          value: storedValue,
+          value: value,
           date: date,
           notes: notes,
         });
@@ -2059,16 +2039,6 @@
         { id: 'water', meter: 'water', period: null, unit: 'm³' }
       ];
 
-      const activeHouseDisp = houses.find(h => h.id === activeHouseId) || {};
-      function getOffset(meter, period) {
-        if (meter === 'water')       return { offset: activeHouseDisp.waterMeterOffset || 0,    date: activeHouseDisp.waterMeterDate || null };
-        if (meter === 'gas')         return { offset: activeHouseDisp.gasOffset || 0,            date: activeHouseDisp.gasOffsetDate || null };
-        if (meter === 'electricity' && period === 'day')    return { offset: activeHouseDisp.elecDayOffset || 0,    date: activeHouseDisp.elecDayOffsetDate || null };
-        if (meter === 'electricity' && period === 'night')  return { offset: activeHouseDisp.elecNightOffset || 0,  date: activeHouseDisp.elecNightOffsetDate || null };
-        if (meter === 'electricity' && period === 'single') return { offset: activeHouseDisp.elecSingleOffset || 0, date: activeHouseDisp.elecSingleOffsetDate || null };
-        return { offset: 0, date: null };
-      }
-
       meters.forEach(({ id, meter, period, unit }) => {
         const filtered = readings.filter(r =>
           r.meter === meter &&
@@ -2083,19 +2053,10 @@
         const changeEl = document.getElementById(`${id}Change`);
 
         if (latest) {
-          const { offset, date: offDate } = getOffset(meter, period);
-          const displayValue = (offset > 0 && offDate && latest.date >= offDate)
-            ? latest.value - offset
-            : latest.value;
-          valueEl.textContent = `${displayValue.toLocaleString()} ${unit}`;
+          valueEl.textContent = `${latest.value.toLocaleString()} ${unit}`;
           dateEl.textContent = formatDate(latest.date);
           if (prev) {
-            // Use display values for diff to avoid cross-boundary inflation
-            const { offset: offPrev, date: offDatePrev } = getOffset(meter, period);
-            const prevDisplay = (offPrev > 0 && offDatePrev && prev.date >= offDatePrev)
-              ? prev.value - offPrev
-              : prev.value;
-            const diff = (displayValue - prevDisplay).toFixed(1);
+            const diff = (latest.value - prev.value).toFixed(1);
             const sign = diff >= 0 ? '+' : '';
             changeEl.textContent = `${sign}${diff} ${unit}`;
             changeEl.style.color = diff >= 0 ? '#4ade80' : '#f87171';
@@ -2166,8 +2127,28 @@
     // ── For each month: consumption = difference between consecutive readings
     //    If two readings are in the same month, accumulate the diff in that month
     //    If readings span multiple months, distribute evenly across the gap ──
-    function buildMonthlyConsumption(allReadingsForMeter, startDate, endDate, isGas) {
-      const sorted = [...allReadingsForMeter].sort((a, b) => new Date(a.date) - new Date(b.date));
+    function getOffsetForAnalytics(meter, period) {
+      const house = houses.find(h => h.id === activeHouseId) || {};
+      if (meter === 'water')       return { offset: house.waterMeterOffset || 0, date: house.waterMeterDate || null };
+      if (meter === 'gas')         return { offset: house.gasOffset || 0,         date: house.gasOffsetDate || null };
+      if (meter === 'electricity' && period === 'day')    return { offset: house.elecDayOffset || 0,    date: house.elecDayOffsetDate || null };
+      if (meter === 'electricity' && period === 'night')  return { offset: house.elecNightOffset || 0,  date: house.elecNightOffsetDate || null };
+      if (meter === 'electricity' && period === 'single') return { offset: house.elecSingleOffset || 0, date: house.elecSingleOffsetDate || null };
+      return { offset: 0, date: null };
+    }
+
+    function applyOffsetToReadings(allReadingsForMeter, meter, period) {
+      const { offset, date: offDate } = getOffsetForAnalytics(meter, period);
+      if (!offset || !offDate) return allReadingsForMeter;
+      return allReadingsForMeter.map(r => ({
+        ...r,
+        value: (r.date > offDate || (r.date === offDate && r.value < offset)) ? r.value + offset : r.value
+      }));
+    }
+
+    function buildMonthlyConsumption(allReadingsForMeter, startDate, endDate, isGas, meter, period) {
+      const withOffset = applyOffsetToReadings(allReadingsForMeter, meter || '', period || null);
+      const sorted = [...withOffset].sort((a, b) => new Date(a.date) - new Date(b.date));
 
       // Build month list within the period
       const months = [];
@@ -2251,7 +2232,7 @@
       );
 
       // Total = sum of all monthly consumption values (without gas conversion)
-      const monthlyDataRaw = buildMonthlyConsumption(allForMeter, startDate, endDate, false);
+      const monthlyDataRaw = buildMonthlyConsumption(allForMeter, startDate, endDate, false, meterType, meterPeriod);
       let totalConsumption = monthlyDataRaw.data.reduce((sum, v) => sum + parseFloat(v || 0), 0);
       if (totalConsumption < 0) totalConsumption = 0;
 
@@ -2277,7 +2258,7 @@
       if (consumptionChart) consumptionChart.destroy();
 
       // monthlyData already built above (with gas conversion for chart display)
-      const monthlyDataForChart = buildMonthlyConsumption(allForMeter, startDate, endDate, isGas);
+      const monthlyDataForChart = buildMonthlyConsumption(allForMeter, startDate, endDate, isGas, meterType, meterPeriod);
 
       const chartColors = {
         'electricity_day':   { bg: 'rgba(247, 37, 133, 0.9)',  border: '#f72585' },
@@ -3127,7 +3108,7 @@
       r.meter === meterInfo.meter &&
       (meterInfo.period ? r.period === meterInfo.period : !r.period)
       );
-      const monthlyDataRaw = buildMonthlyConsumption(allForMeter, startDate, endDate, false);
+      const monthlyDataRaw = buildMonthlyConsumption(allForMeter, startDate, endDate, false, meterType, meterPeriod);
       const total = monthlyDataRaw.data.reduce((s, v) => s + parseFloat(v || 0), 0);
       const avg   = total / numMonths;
 
