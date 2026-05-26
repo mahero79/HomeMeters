@@ -2140,10 +2140,14 @@
     function applyOffsetToReadings(allReadingsForMeter, meter, period) {
       const { offset, date: offDate } = getOffsetForAnalytics(meter, period);
       if (!offset || !offDate) return allReadingsForMeter;
-      return allReadingsForMeter.map(r => ({
-        ...r,
-        value: (r.date > offDate || (r.date === offDate && r.value < offset)) ? r.value + offset : r.value
-      }));
+      return allReadingsForMeter.map(r => {
+        // Skip readings already modified directly (legacy offsetApplied flag)
+        if (r.offsetApplied) return r;
+        return {
+          ...r,
+          value: (r.date > offDate || (r.date === offDate && r.value < offset)) ? r.value + offset : r.value
+        };
+      });
     }
 
     function buildMonthlyConsumption(allReadingsForMeter, startDate, endDate, isGas, meter, period) {
@@ -2755,14 +2759,8 @@
         let houseReadings = [];
         try { houseReadings = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
 
-        // Get current offset to reverse it
-        let offset = 0, offsetDate = null;
-        if (meterType === 'water')       { offset = house.waterMeterOffset || 0; offsetDate = house.waterMeterDate; house.waterMeterOffset = 0; house.waterMeterDate = null; }
-        else if (meterType === 'gas')    { offset = house.gasOffset || 0; offsetDate = house.gasOffsetDate; house.gasOffset = 0; house.gasOffsetDate = null; }
-        else if (meterType === 'elec_day')    { offset = house.elecDayOffset || 0; offsetDate = house.elecDayOffsetDate; house.elecDayOffset = 0; house.elecDayOffsetDate = null; }
-        else if (meterType === 'elec_night')  { offset = house.elecNightOffset || 0; offsetDate = house.elecNightOffsetDate; house.elecNightOffset = 0; house.elecNightOffsetDate = null; }
-        else if (meterType === 'elec_single') { offset = house.elecSingleOffset || 0; offsetDate = house.elecSingleOffsetDate; house.elecSingleOffset = 0; house.elecSingleOffsetDate = null; }
-
+        // Get current offset to reverse any legacy direct-modified readings (offsetApplied flag)
+        let offset = 0;
         const meterMap = {
           water:       [{ meter: 'water',       period: null }],
           gas:         [{ meter: 'gas',         period: null }],
@@ -2772,20 +2770,28 @@
         };
         const targets = meterMap[meterType] || [];
 
-        // Reverse the offset on readings that had it applied
-        houseReadings = houseReadings.map(r => {
-          const match = targets.some(tgt =>
-            r.meter === tgt.meter && (tgt.period ? r.period === tgt.period : !r.period || r.period === undefined)
-          );
-          if (match && r.offsetApplied) {
-            r.value = r.value - offset;
-            delete r.offsetApplied;
-          }
-          return r;
-        });
+        if (meterType === 'water')       { offset = house.waterMeterOffset || 0; house.waterMeterOffset = 0; house.waterMeterDate = null; }
+        else if (meterType === 'gas')    { offset = house.gasOffset || 0; house.gasOffset = 0; house.gasOffsetDate = null; }
+        else if (meterType === 'elec_day')    { offset = house.elecDayOffset || 0; house.elecDayOffset = 0; house.elecDayOffsetDate = null; }
+        else if (meterType === 'elec_night')  { offset = house.elecNightOffset || 0; house.elecNightOffset = 0; house.elecNightOffsetDate = null; }
+        else if (meterType === 'elec_single') { offset = house.elecSingleOffset || 0; house.elecSingleOffset = 0; house.elecSingleOffsetDate = null; }
+
+        // Reverse offset only on legacy readings that were directly modified (offsetApplied flag)
+        if (offset > 0) {
+          houseReadings = houseReadings.map(r => {
+            const match = targets.some(tgt =>
+              r.meter === tgt.meter && (tgt.period ? r.period === tgt.period : !r.period || r.period === undefined)
+            );
+            if (match && r.offsetApplied) {
+              r.value = r.value - offset;
+              delete r.offsetApplied;
+            }
+            return r;
+          });
+          localStorage.setItem(key, JSON.stringify(houseReadings));
+        }
 
         localStorage.setItem('houses', JSON.stringify(houses));
-        localStorage.setItem(key, JSON.stringify(houseReadings));
         if (houseId === activeHouseId) loadReadings();
       }
       closeMeterReplacementModal();
@@ -2807,8 +2813,8 @@
       const idx = houses.findIndex(h => h.id === houseId);
       if (idx !== -1) {
         const house = houses[idx];
-        const isDual = (house.electricityType || 'dual') === 'dual';
 
+        // Save offset info to house object only — applyOffsetToReadings handles calculations dynamically
         if (meterType === 'water') {
           house.waterMeterOffset = offset; house.waterMeterDate = replacementDate;
         } else if (meterType === 'gas') {
@@ -2821,34 +2827,6 @@
           house.elecSingleOffset = offset; house.elecSingleOffsetDate = replacementDate;
         }
         localStorage.setItem('houses', JSON.stringify(houses));
-
-        // Determine which meter readings to update
-        const meterMap = {
-          water:       [{ meter: 'water',       period: null }],
-          gas:         [{ meter: 'gas',         period: null }],
-          elec_day:    [{ meter: 'electricity', period: 'day' }],
-          elec_night:  [{ meter: 'electricity', period: 'night' }],
-          elec_single: [{ meter: 'electricity', period: 'single' }]
-        };
-        const targets = meterMap[meterType] || [];
-
-        const key = `meterReadings_${houseId}`;
-        let houseReadings = [];
-        try { houseReadings = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-
-        houseReadings = houseReadings.map(r => {
-          const match = targets.some(tgt =>
-            r.meter === tgt.meter && (tgt.period ? r.period === tgt.period : !r.period || r.period === undefined)
-          );
-          // Only add offset if not already added (check using a flag)
-          if (match && r.date >= replacementDate && !r.offsetApplied) {
-            r.value = r.value + offset;
-            r.offsetApplied = true;
-          }
-          return r;
-        });
-
-        localStorage.setItem(key, JSON.stringify(houseReadings));
         if (houseId === activeHouseId) loadReadings();
       }
 
